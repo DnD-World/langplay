@@ -47,7 +47,7 @@ export function RecipeHub({ open, onClose, onInstall }: { open: boolean; onClose
     <Overlay open={open} onClose={onClose} wide>
       <h2 className="text-xl font-bold"><AnimatedIcon name="blocks" /> Recipe Library</h2>
       <p className="mb-4 text-sm text-muted-foreground">LangChain · LangSmith · Community · Prompt Hub</p>
-      <div className="mb-4 inline-flex rounded-lg border p-1">
+      <div className="mb-4 flex flex-wrap gap-1 rounded-lg border p-1">
         {(["browse", "sources", "hub", "import"] as const).map((t) => (
           <Button variant="ghost" key={t} onClick={() => { setTab(t); setMsg(""); }} className={`rounded-md px-3 py-1.5 text-sm font-semibold ${tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
             {{ browse: "Recipes", sources: "Cookbooks", hub: "Prompt Hub", import: "Import" }[t]}
@@ -58,7 +58,7 @@ export function RecipeHub({ open, onClose, onInstall }: { open: boolean; onClose
       {tab === "browse" ? (
         <>
           <div className="mb-3 flex items-center gap-2">
-            <input className={inputCls} placeholder="🔍 Search recipes…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <AnimatedIcon name="tool" /><input className={inputCls} placeholder="Search recipes…" value={q} onChange={(e) => setQ(e.target.value)} />
             <Info tip="Type a word to find recipes that mention it." />
           </div>
           <div className="mb-5 flex flex-wrap gap-2">

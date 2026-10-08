@@ -28,7 +28,7 @@ export function SettingsDrawer({
   const pick = (id: ProviderId) => {
     const p = PROVIDERS.find((x) => x.id === id);
     if (!p) return;
-    setSettings({ ...settings, provider: id, baseUrl: p.baseUrl, model: p.model, freeAllowance: false, modelFreeVerified: false });
+    setSettings({ ...settings, provider: id, apiKey: "", baseUrl: p.baseUrl, model: p.model, freeAllowance: false, modelFreeVerified: false });
     setStatus("idle");
   };
 
@@ -60,7 +60,8 @@ export function SettingsDrawer({
                 <Button variant="ghost"
                   key={p.id}
                   onClick={() => pick(p.id)}
-                  className={`flex items-center justify-between rounded-lg border px-2.5 py-2 text-left text-xs transition ${
+                  aria-label={p.name}
+                  className={`flex h-auto min-h-9 items-center justify-between whitespace-normal rounded-lg border px-2.5 py-2 text-left text-xs transition ${
                     settings.provider === p.id ? "border-primary bg-primary/15 text-primary" : "hover:border-primary/50"
                   }`}
                 >
@@ -89,13 +90,13 @@ export function SettingsDrawer({
         <div className="space-y-4">
           <div>
             <Label tip="The web address where the AI lives — usually filled in for you.">Base URL</Label>
-            <input className={inputCls} value={settings.baseUrl} onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value })} placeholder="https://..." />
+            <input className={inputCls} value={settings.baseUrl} onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value, modelFreeVerified: false })} placeholder="https://..." />
           </div>
           <div>
             <Label tip="Your private service key stays in this browser; do not use a shared device.">
               API Key {prov?.needsKey ? "" : "(optional)"}
             </Label>
-            <input type="password" className={inputCls} value={settings.apiKey} onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })} placeholder={prov?.needsKey ? "sk-..." : "Not needed for this one"} />
+            <input type="password" className={inputCls} value={settings.apiKey} onChange={(e) => setSettings({ ...settings, apiKey: e.target.value, freeAllowance: false, modelFreeVerified: false })} placeholder={prov?.needsKey ? "sk-..." : "Not needed for this one"} />
           </div>
           <div>
             <Label tip="Which specific AI 'brain' to use — different ones are smarter, faster or cheaper.">Model</Label>
@@ -122,8 +123,8 @@ export function Overlay({ open, onClose, children, wide }: { open: boolean; onCl
   return (
     <div className={`fixed inset-0 z-40 transition ${open ? "" : "pointer-events-none"}`}>
       <div onClick={onClose} className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
-      <aside aria-label="AI connection panel" aria-hidden={!open} inert={!open} className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
-        <Button variant="ghost" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 rounded-md px-2 py-1 text-muted-foreground hover:bg-secondary">✕</Button>
+      <aside aria-label={wide ? "Recipe library" : "AI connection panel"} aria-hidden={!open} inert={!open} className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
+        <Button variant="ghost" onClick={onClose} aria-label="Close" size="icon" className="absolute right-4 top-4 rounded-md text-muted-foreground hover:bg-secondary"><AnimatedIcon name="close" /></Button>
         {children}
       </aside>
     </div>
