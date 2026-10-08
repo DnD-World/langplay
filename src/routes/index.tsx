@@ -194,7 +194,7 @@ function Playground() {
             <AnimatedIcon name="tool" /> Explore Library
             <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">{RECIPES.length}</span>
           </Button>
-          <Button variant="ghost" onClick={() => setShowSettings(true)} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}>
+          <Button onClick={() => setShowSettings(true)} className={`${btn} hover:brightness-110`}>
             <AnimatedIcon name="settings" /> {prov === "simulator" ? "Simulator" : "AI Connection"}
           </Button>
         </div>
@@ -312,7 +312,7 @@ function Playground() {
             <form onSubmit={(e) => { e.preventDefault(); if (!running) run(); }} className="flex items-center gap-2">
               <input className={inputCls} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="Ask a question, e.g. Why is the sky blue?" />
               <Info tip="Your question — it gets dropped into the first step of the recipe." />
-              <Button variant="ghost" disabled={!!running || steps.length === 0} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}><AnimatedIcon name="play" /> {running ? "Running…" : done.includes("first_run") ? "Run" : "Run · +50 XP"}</Button>
+              <Button disabled={!!running || steps.length === 0} className={`${btn} hover:brightness-110`}><AnimatedIcon name="play" /> {running ? "Running…" : done.includes("first_run") ? "Run" : "Run · +50 XP"}</Button>
             </form>
           </div>
         </section>

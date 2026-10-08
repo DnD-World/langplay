@@ -134,7 +134,7 @@ export function SettingsDrawer({
       )}
 
       <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={test} disabled={status === "testing"} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}>
+        <Button onClick={test} disabled={status === "testing"} className={`${btn} hover:brightness-110`}>
           {status === "testing" ? "Testing…" : "Test Connection"}
         </Button>
         <Info tip="Sends a tiny hello to the AI to check everything works." />

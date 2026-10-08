@@ -102,7 +102,7 @@ export function RecipeHub({ open, onClose, onInstall }: { open: boolean; onClose
                 )}
                 <div className="mt-auto flex gap-2">
                   <Button variant="ghost" onClick={() => setInspect(inspect === r.id ? null : r.id)} className={`${btn} border hover:bg-secondary`}>Inspect</Button>
-                  <Button variant="ghost" onClick={() => { onInstall(r); onClose(); }} className={`${btn} flex-1 bg-primary text-primary-foreground hover:brightness-110`}><AnimatedIcon name="spark" /> Install · +40 XP</Button>
+                  <Button onClick={() => { onInstall(r); onClose(); }} className={`${btn} flex-1 hover:brightness-110`}><AnimatedIcon name="spark" /> Install · +40 XP</Button>
                 </div>
               </article></BorderGlow>
             ))}
@@ -138,7 +138,7 @@ export function RecipeHub({ open, onClose, onInstall }: { open: boolean; onClose
         <div>
           <Label tip="Paste a web link to a recipe file, or the recipe text itself.">Recipe link or JSON</Label>
           <textarea className={`${inputCls} h-48 font-mono text-xs`} value={raw} onChange={(e) => { setRaw(e.target.value); setReviewedImport(null); }} placeholder={'{\n  "title": "My Recipe",\n  "steps": [\n    { "kind": "input", "instruction": "{question}" },\n    { "kind": "agent", "instruction": "Answer kindly" },\n    { "kind": "final", "instruction": "Be brief" }\n  ]\n}'} />
-          <Button variant="ghost" onClick={doImport} className={`${btn} mt-3 bg-primary text-primary-foreground`}>Preview Recipe</Button>
+          <Button onClick={doImport} className={`${btn} mt-3`}>Preview Recipe</Button>
           {reviewedImport && <div className="mt-4 space-y-3 border-t pt-4"><h3 className="font-bold">{reviewedImport.title}</h3><p className="text-sm">{reviewedImport.summary}</p><ol className="space-y-2 text-sm">{reviewedImport.steps.map((s,i) => <li key={i}><b>{i+1}. {s.label ?? KINDS[s.kind].title}</b><p className="text-muted-foreground whitespace-pre-wrap">{s.instruction}</p></li>)}</ol><Button onClick={() => { onInstall(reviewedImport); onClose(); }}>Install reviewed recipe</Button></div>}
 
         </div>
