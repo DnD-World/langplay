@@ -19,7 +19,7 @@ export function Motion({ children, enabled }: { children: ReactNode; enabled: bo
   </Suspense>}{children}</>;
 }
 
-// Adapted from React Bits StarBorder by David Haz; license in react-bits/LICENSE.md.
+// Adapted from React Bits BorderGlow by David Haz; license in react-bits/LICENSE.md.
 export function StarFrame({ children, active }: { children: ReactNode; active: boolean }) {
   return <BorderGlow className={`star-frame ${active ? 'star-frame-active' : ''}`} animated={active}>{children}</BorderGlow>;
 }

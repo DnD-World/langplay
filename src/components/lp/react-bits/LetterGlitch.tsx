@@ -187,7 +187,7 @@ const LetterGlitch = ({
   };
 
   const animate = () => {
-    if (document.hidden) { animationRef.current = requestAnimationFrame(animate); return; }
+    if (document.hidden) { animationRef.current = null; return; }
     const now = Date.now();
     if (now - lastGlitchTime.current >= glitchSpeed) {
       updateLetters();
@@ -222,11 +222,17 @@ const LetterGlitch = ({
     };
 
     window.addEventListener('resize', handleResize);
+    const onVisibility = () => {
+      if (document.hidden) { if (animationRef.current !== null) cancelAnimationFrame(animationRef.current); animationRef.current = null; }
+      else if (animationRef.current === null) animate();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
       clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [glitchSpeed, smooth]);
