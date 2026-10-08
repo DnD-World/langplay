@@ -121,7 +121,7 @@ export function SettingsDrawer({
 
 export function Overlay({ open, onClose, children, wide }: { open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className={`fixed inset-0 z-40 transition ${open ? "" : "pointer-events-none"}`}>
+    <div className={`fixed inset-0 z-40 overflow-hidden transition ${open ? "" : "pointer-events-none"}`}>
       <div onClick={onClose} className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
       <aside aria-label={wide ? "Recipe library" : "AI connection panel"} aria-hidden={!open} inert={!open} className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
         <Button variant="ghost" onClick={onClose} aria-label="Close" size="icon" className="absolute right-4 top-4 rounded-md text-muted-foreground hover:bg-secondary"><AnimatedIcon name="close" /></Button>

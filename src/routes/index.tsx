@@ -144,7 +144,7 @@ function Playground() {
           log(`Looked at the question and sent it to the ${path}.`);
         } else {
           const out = await chat(settings, [
-            { role: "system", content: `${s.instruction} Keep it short and beginner-friendly.` },
+            { role: "system", content: `${s.instruction.replaceAll("{question}", qn)} Keep it short and beginner-friendly.` },
             { role: "user", content: `${context}${notes.length ? `\n\nNotes so far:\n${notes.join("\n")}` : ""}${answer ? `\n\nPrevious draft:\n${answer}` : ""}` },
           ]);
           answer = out;
