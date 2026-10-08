@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PROVIDERS, type ProviderId } from "@/lib/lp-data";
 import { chat, type LlmSettings } from "@/lib/lp-llm";
 import { Info, Label, inputCls, btn } from "./Info";
+import { Button } from "@/components/ui/button";
+import { AnimatedIcon } from "./AnimatedIcon";
+import { fetchModels, presetModels, MODEL_POLICY, type ModelOption } from "@/lib/lp-models";
 
 export function SettingsDrawer({
   open, onClose, settings, setSettings, onTested,
@@ -14,12 +17,18 @@ export function SettingsDrawer({
 }) {
   const [status, setStatus] = useState<"idle" | "testing" | "ok" | "bad">("idle");
   const [err, setErr] = useState("");
-  const prov = PROVIDERS.find((p) => p.id === settings.provider) ?? PROVIDERS[0]!;
+  const prov = PROVIDERS.find((p) => p.id === settings.provider) ?? PROVIDERS[0];
+  const [models, setModels] = useState<ModelOption[]>([]);
+  const [modelStatus, setModelStatus] = useState("");
+  useEffect(() => { setModels(presetModels(settings)); setModelStatus(""); }, [settings.provider, settings.freeAllowance]);
+  const visibleModels = models.filter(m => !settings.freeOnly || m.free);
+  const policy = MODEL_POLICY[settings.provider];
   const groups = [...new Set(PROVIDERS.map((p) => p.group))];
 
   const pick = (id: ProviderId) => {
-    const p = PROVIDERS.find((x) => x.id === id)!;
-    setSettings({ ...settings, provider: id, baseUrl: p.baseUrl, model: p.model });
+    const p = PROVIDERS.find((x) => x.id === id);
+    if (!p) return;
+    setSettings({ ...settings, provider: id, apiKey: "", baseUrl: p.baseUrl, model: p.model, freeAllowance: false, modelFreeVerified: false });
     setStatus("idle");
   };
 
@@ -38,7 +47,7 @@ export function SettingsDrawer({
 
   return (
     <Overlay open={open} onClose={onClose}>
-      <h2 className="text-xl font-bold">⚙️ AI Connection</h2>
+      <h2 className="text-xl font-bold"><AnimatedIcon name="settings" /> AI Connection</h2>
       <p className="mb-5 text-sm text-muted-foreground">Choose which AI brain powers your recipes.</p>
 
       <Label tip="Pick the company or app whose AI will answer your questions.">Provider</Label>
@@ -48,46 +57,59 @@ export function SettingsDrawer({
             <div className="mb-1 text-[11px] text-muted-foreground">{g}</div>
             <div className="grid grid-cols-2 gap-1.5">
               {PROVIDERS.filter((p) => p.group === g).map((p) => (
-                <button
+                <Button variant="ghost"
                   key={p.id}
                   onClick={() => pick(p.id)}
-                  className={`flex items-center justify-between rounded-lg border px-2.5 py-2 text-left text-xs transition ${
+                  aria-label={p.name}
+                  className={`flex h-auto min-h-9 items-center justify-between whitespace-normal rounded-lg border px-2.5 py-2 text-left text-xs transition ${
                     settings.provider === p.id ? "border-primary bg-primary/15 text-primary" : "hover:border-primary/50"
                   }`}
                 >
                   <span>{p.name}</span>
                   <Info tip={p.tip} />
-                </button>
+                </Button>
               ))}
             </div>
           </div>
         ))}
       </div>
 
+      <div className="mb-5 space-y-3 border-y py-4">
+        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!settings.freeOnly} onChange={e => setSettings({ ...settings, freeOnly: e.target.checked, modelFreeVerified: models.some(m => m.id === settings.model && m.free) })} />Free models only<Info tip="Hide models that charge money or whose free allowance has not been confirmed." /></label>
+        {policy && <><p className="text-xs text-muted-foreground">{policy.note} <a className="text-primary underline" href={policy.url} target="_blank" rel="noreferrer">Provider policy</a></p>
+        {!["openrouter", "puter"].includes(settings.provider) && <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={!!settings.freeAllowance} onChange={e => setSettings({ ...settings, freeAllowance: e.target.checked, modelFreeVerified: false })} />My key has an active free / trial allowance<Info tip="Confirm this in your provider account; Langplay cannot see your balance or plan." /></label>}</>}
+        <Button variant="outline" size="sm" onClick={async () => { setModelStatus("Loading…"); try { const list = await fetchModels(settings); setModels(list); setModelStatus(`${list.length} models loaded`); setSettings({ ...settings, modelFreeVerified: list.some(m => m.id === settings.model && m.free) }); } catch(e) { setModelStatus(e instanceof Error ? e.message : "Could not load models"); } }}><AnimatedIcon name="spark" />Refresh models</Button><Info tip="Ask this provider for its current model list; some services block direct browser requests." />
+        {modelStatus && <p className="text-xs text-muted-foreground" role="status">{modelStatus}</p>}
+        <Label tip="Pick a suggested model; labels say whether its price or allowance qualifies.">Available models ({visibleModels.length})</Label>
+        <select aria-label="Available models" className={inputCls} value={visibleModels.some(m => m.id === settings.model) ? settings.model : ""} onChange={e => { const m = visibleModels.find(m => m.id === e.target.value); if(m) setSettings({ ...settings, model: m.id, modelFreeVerified: m.free }); }}>
+          <option value="" disabled>Choose a model</option>{visibleModels.map(m => <option key={m.id} value={m.id}>{m.id} · {m.evidence}</option>)}
+        </select>
+        {visibleModels.length === 0 && <p className="text-xs text-muted-foreground">No verified free models. Confirm your allowance, refresh, or turn off the filter.</p>}
+      </div>
       {settings.provider !== "simulator" && (
         <div className="space-y-4">
           <div>
             <Label tip="The web address where the AI lives — usually filled in for you.">Base URL</Label>
-            <input className={inputCls} value={settings.baseUrl} onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value })} placeholder="https://..." />
+            <input className={inputCls} value={settings.baseUrl} onChange={(e) => setSettings({ ...settings, baseUrl: e.target.value, modelFreeVerified: false })} placeholder="https://..." />
           </div>
           <div>
-            <Label tip="A secret password for paid AI services; it stays only in this browser.">
-              API Key {prov.needsKey ? "" : "(optional)"}
+            <Label tip="Your private service key stays in this browser; do not use a shared device.">
+              API Key {prov?.needsKey ? "" : "(optional)"}
             </Label>
-            <input type="password" className={inputCls} value={settings.apiKey} onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })} placeholder={prov.needsKey ? "sk-..." : "Not needed for this one"} />
+            <input type="password" className={inputCls} value={settings.apiKey} onChange={(e) => setSettings({ ...settings, apiKey: e.target.value, freeAllowance: false, modelFreeVerified: false })} placeholder={prov?.needsKey ? "sk-..." : "Not needed for this one"} />
           </div>
           <div>
             <Label tip="Which specific AI 'brain' to use — different ones are smarter, faster or cheaper.">Model</Label>
-            <input list="lp-models" className={inputCls} value={settings.model} onChange={(e) => setSettings({ ...settings, model: e.target.value })} placeholder="e.g. gpt-4o, llama-3, mistral" />
-            <datalist id="lp-models">{prov.models.map((m) => <option key={m} value={m} />)}</datalist>
+            <input list="lp-models" className={inputCls} value={settings.model} onChange={(e) => setSettings({ ...settings, model: e.target.value, modelFreeVerified: visibleModels.some(m => m.id === e.target.value && m.free) })} placeholder="e.g. gpt-4o, llama-3, mistral" />
+            <datalist id="lp-models">{visibleModels.map((m) => <option key={m.id} value={m.id} />)}</datalist>
           </div>
         </div>
       )}
 
       <div className="mt-6 flex items-center gap-3">
-        <button onClick={test} disabled={status === "testing"} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}>
+        <Button variant="ghost" onClick={test} disabled={status === "testing"} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}>
           {status === "testing" ? "Testing…" : "Test Connection"}
-        </button>
+        </Button>
         <Info tip="Sends a tiny hello to the AI to check everything works." />
         {status === "ok" && <span className="animate-pop rounded-full bg-success/20 px-3 py-1 text-xs font-bold text-success">● Ready</span>}
         {status === "bad" && <span className="animate-pop rounded-full bg-destructive/20 px-3 py-1 text-xs font-bold text-destructive">● Check details</span>}
@@ -99,10 +121,10 @@ export function SettingsDrawer({
 
 export function Overlay({ open, onClose, children, wide }: { open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className={`fixed inset-0 z-40 transition ${open ? "" : "pointer-events-none"}`}>
+    <div className={`fixed inset-0 z-40 overflow-hidden transition ${open ? "" : "pointer-events-none"}`}>
       <div onClick={onClose} className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
-      <aside className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
-        <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 rounded-md px-2 py-1 text-muted-foreground hover:bg-secondary">✕</button>
+      <aside aria-label={wide ? "Recipe library" : "AI connection panel"} aria-hidden={!open} inert={!open} className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
+        <Button variant="ghost" onClick={onClose} aria-label="Close" size="icon" className="absolute right-4 top-4 rounded-md text-muted-foreground hover:bg-secondary"><AnimatedIcon name="close" /></Button>
         {children}
       </aside>
     </div>

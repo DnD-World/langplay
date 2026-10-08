@@ -1,0 +1,10 @@
+.motion-background { position: fixed; inset: 0; opacity: .065; pointer-events: none; }
+.star-frame { position: relative; overflow: hidden; border-radius: 8px; padding: 1px; }
+.star-frame-active { background: var(--border); }
+.border-gradient-bottom, .border-gradient-top { position: absolute; width: 300%; height: 50%; opacity: .7; background: radial-gradient(circle, var(--primary), transparent 10%); pointer-events: none; }
+.border-gradient-bottom { bottom: -12px; right: -250%; animation: star-movement-bottom 5s linear infinite alternate; }
+.border-gradient-top { top: -12px; left: -250%; animation: star-movement-top 5s linear infinite alternate; }
+.star-inner { position: relative; border-radius: 7px; }
+.star-frame-active .star-inner { background: var(--card); }
+@keyframes star-movement-bottom { from { transform: translate(0,0); opacity: 1; } to { transform: translate(-100%,0); opacity: 0; } }
+@keyframes star-movement-top { from { transform: translate(0,0); opacity: 1; } to { transform: translate(100%,0); opacity: 0; } }
