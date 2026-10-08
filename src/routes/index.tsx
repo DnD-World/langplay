@@ -89,12 +89,12 @@ function Playground() {
   const move = (id: string, dir: -1 | 1) => setSteps((s) => {
     const i = s.findIndex((x) => x.id === id); const j = i + dir;
     if (j < 0 || j >= s.length) return s;
-    const c = [...s]; [c[i], c[j]] = [c[j], c[i]]; return c;
+    const c = [...s]; [c[i], c[j]] = [c[j]!, c[i]!]; return c;
   });
   const dropOn = (targetId: string) => {
     if (!dragId || dragId === targetId) return;
     setSteps((s) => {
-      const c = [...s]; const from = c.findIndex((x) => x.id === dragId); const [it] = c.splice(from, 1);
+      const c = [...s]; const from = c.findIndex((x) => x.id === dragId); const [it] = c.splice(from, 1); if (!it) return s;
       c.splice(c.findIndex((x) => x.id === targetId), 0, it); return c;
     });
     setDragId(null);

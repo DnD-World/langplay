@@ -47,8 +47,8 @@ export async function chat(s: LlmSettings, messages: Msg[]): Promise<string> {
   }
   const url = s.baseUrl.replace(/\/$/, "") + (s.baseUrl.endsWith("/openai") ? "" : "/chat/completions");
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (s.apiKey) headers.Authorization = `Bearer ${s.apiKey}`;
-  else if (s.provider === "horde") headers.Authorization = "Bearer 0000000000";
+  if (s.apiKey) headers["Authorization"] = `Bearer ${s.apiKey}`;
+  else if (s.provider === "horde") headers["Authorization"] = "Bearer 0000000000";
   const res = await fetch(url, { method: "POST", headers, body: JSON.stringify({ model: s.model, messages }) });
   if (!res.ok) throw new Error(`The AI service replied with an error (${res.status}).`);
   const j = await res.json();

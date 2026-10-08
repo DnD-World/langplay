@@ -14,7 +14,7 @@ export function SettingsDrawer({
 }) {
   const [status, setStatus] = useState<"idle" | "testing" | "ok" | "bad">("idle");
   const [err, setErr] = useState("");
-  const prov = PROVIDERS.find((p) => p.id === settings.provider) ?? PROVIDERS[0];
+  const prov = PROVIDERS.find((p) => p.id === settings.provider) ?? PROVIDERS[0]!;
   const groups = [...new Set(PROVIDERS.map((p) => p.group))];
 
   const pick = (id: ProviderId) => {
