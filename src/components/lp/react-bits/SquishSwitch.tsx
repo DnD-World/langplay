@@ -73,7 +73,16 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
   className = '',
   id
 }) => {
-  const reduce = useReducedMotion();
+  const systemReduce = useReducedMotion();
+  const [motionOff, setMotionOff] = useState(false);
+  useEffect(() => {
+    const update = () => setMotionOff(document.documentElement.classList.contains('motion-off'));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+  const reduce = systemReduce || motionOff;
   const inset = Math.max(3, Math.round(height * 0.11));
   const thumb = height - inset * 2;
   const min = inset;

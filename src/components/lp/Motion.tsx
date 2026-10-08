@@ -13,11 +13,10 @@ export function Motion({ children, enabled }: { children: ReactNode; enabled: bo
     setColor(getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
     return () => media.removeEventListener('change', update);
   }, []);
-  if (!enabled || !ready || !color) return <>{children}</>;
-  return <Suspense fallback={children}>
+  return <>{enabled && ready && color && <Suspense fallback={null}>
     <div className="motion-background" aria-hidden="true"><LetterGlitch glitchColors={[color]} glitchSpeed={180} centerVignette={false} outerVignette={false} smooth characters="LANGPLAY 01 + →" /></div>
-    <ClickSpark sparkColor={color}>{children}</ClickSpark>
-  </Suspense>;
+    <ClickSpark sparkColor={color} />
+  </Suspense>}{children}</>;
 }
 
 // Adapted from React Bits StarBorder by David Haz; license in react-bits/LICENSE.md.
