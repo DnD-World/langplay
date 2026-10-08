@@ -29,6 +29,7 @@ export async function readSource(file: SourceFile): Promise<{ text: string; prom
   }
   const prompts = [...text.matchAll(/(?:template|system_prompt|prompt)\s*=\s*(?:[fr])?(?:"""([\s\S]*?)"""|'''([\s\S]*?)'''|"([^"\n]{25,})"|'([^'\n]{25,})')/gi)]
     .map(m => m[1] ?? m[2] ?? m[3] ?? m[4] ?? '').filter(Boolean);
+  for (const match of text.matchAll(/(?:from_template|PromptTemplate)\s*\(\s*(?:template\s*=\s*)?(?:[fr])?(?:"""([\s\S]*?)"""|'''([\s\S]*?)'''|"([^"\n]{25,})"|'([^'\n]{25,})')/gi)) prompts.push(match[1] ?? match[2] ?? match[3] ?? match[4] ?? '');
   return { text, prompts: [...new Set(prompts)] };
 }
 function collectTemplates(value: unknown, result: string[]) {

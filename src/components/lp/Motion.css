@@ -1,10 +1,9 @@
-.motion-background { position: fixed; inset: 0; opacity: .065; pointer-events: none; }
-.star-frame { position: relative; overflow: hidden; border-radius: 8px; padding: 1px; }
-.star-frame-active { background: var(--border); }
-.border-gradient-bottom, .border-gradient-top { position: absolute; width: 300%; height: 50%; opacity: .7; background: radial-gradient(circle, var(--primary), transparent 10%); pointer-events: none; }
-.border-gradient-bottom { bottom: -12px; right: -250%; animation: star-movement-bottom 5s linear infinite alternate; }
-.border-gradient-top { top: -12px; left: -250%; animation: star-movement-top 5s linear infinite alternate; }
-.star-inner { position: relative; border-radius: 7px; }
-.star-frame-active .star-inner { background: var(--card); }
-@keyframes star-movement-bottom { from { transform: translate(0,0); opacity: 1; } to { transform: translate(-100%,0); opacity: 0; } }
-@keyframes star-movement-top { from { transform: translate(0,0); opacity: 1; } to { transform: translate(100%,0); opacity: 0; } }
+.motion-background { position: fixed; inset: 0; opacity: .045; pointer-events: none; z-index: 0; }
+.letter-glitch, .letter-glitch canvas { width: 100%; height: 100%; display: block; }
+.star-frame { position: relative; overflow: visible; border-radius: 8px; }
+.star-frame > .border-glow-inner > div { border: 0; }
+.hold-button.hold-delete { width: 28px; height: 28px; padding: 0; min-width: 28px; }
+.hold-delete .hold-button__icon { margin: 0; }
+.squish-switch:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
+.motion-off .animated-icon, .motion-off .animated-icon svg, .motion-off .animated-icon svg * { animation: none !important; }
+.motion-off .squish-switch__thumb { transform: none; }

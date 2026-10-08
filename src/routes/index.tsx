@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { AnimatedIcon } from "@/components/lp/AnimatedIcon";
 import { Motion, StarFrame } from "@/components/lp/Motion";
 import "@/components/lp/Motion.css";
+import { HoldDelete, SquishToggle, RunThought } from '@/components/lp/EffectControls';
 import logo from "@/assets/langplay-logo.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -56,14 +57,19 @@ function Playground() {
   useEffect(() => {
     try {
       const s = JSON.parse(localStorage.getItem("lp-settings") || "null");
-      if (s) setSettings(s);
+      if (s && typeof s === 'object' && typeof s.provider === 'string' && typeof s.baseUrl === 'string' && typeof s.apiKey === 'string' && typeof s.model === 'string') setSettings({ ...s, modelFreeVerified: false });
       const g = JSON.parse(localStorage.getItem("lp-game") || "null");
-      if (g) { completed.current = new Set(g.done); setDone(g.done); setPoints(g.points); setCoins(g.coins); setRetro(!!g.retro); }
+      if (g && Array.isArray(g.done) && Number.isFinite(g.points) && Number.isFinite(g.coins)) { const valid = g.done.filter((id: unknown) => typeof id === 'string' && QUESTS.some(q => q.id === id)); completed.current = new Set(valid); setDone(valid); setPoints(Math.max(0, g.points)); setCoins(Math.max(0, g.coins)); setRetro(!!g.retro); }
+      setMotion(localStorage.getItem('lp-motion') !== 'off');
     } catch { /* ignore */ }
     loaded.current = true;
   }, []);
-  useEffect(() => { if (loaded.current) localStorage.setItem("lp-settings", JSON.stringify(settings)); }, [settings]);
-  useEffect(() => { if (loaded.current) localStorage.setItem("lp-game", JSON.stringify({ done, points, coins, retro })); }, [done, points, coins, retro]);
+  useEffect(() => { try { if (loaded.current) localStorage.setItem("lp-settings", JSON.stringify(settings)); } catch { /* storage may be blocked */ } }, [settings]);
+  useEffect(() => { try { if (loaded.current) localStorage.setItem("lp-game", JSON.stringify({ done, points, coins, retro })); } catch { /* storage may be blocked */ } }, [done, points, coins, retro]);
+
+  useEffect(() => { try { if (loaded.current) localStorage.setItem('lp-motion', motion ? 'on' : 'off'); } catch {} }, [motion]);
+  useEffect(() => { document.documentElement.classList.toggle('motion-off', !motion); return () => document.documentElement.classList.remove('motion-off'); }, [motion]);
+  const runLock = useRef(false);
 
   const complete = (id: string) => {
     const quest = QUESTS.find(x => x.id === id);
@@ -94,13 +100,13 @@ function Playground() {
 
   const move = (id: string, dir: -1 | 1) => setSteps((s) => {
     const i = s.findIndex((x) => x.id === id); const j = i + dir;
-    if (j < 0 || j >= s.length) return s;
+    if (i < 0 || j < 0 || j >= s.length) return s;
     const c = [...s]; const first = c[i]; const second = c[j]; if (!first || !second) return s; c[i] = second; c[j] = first; complete("connect2"); return c;
   });
   const dropOn = (targetId: string) => {
     if (!dragId || dragId === targetId) return;
     setSteps((s) => {
-      const c = [...s]; const from = c.findIndex((x) => x.id === dragId); const [it] = c.splice(from, 1); if (!it) return s;
+      const c = [...s]; const from = c.findIndex((x) => x.id === dragId); if (from < 0) return s; const [it] = c.splice(from, 1); if (!it) return s;
       c.splice(c.findIndex((x) => x.id === targetId), 0, it); return c;
     });
     setDragId(null); complete("connect2");
@@ -113,7 +119,9 @@ function Playground() {
   };
 
   const run = async () => {
-    if (!steps.length || running) return;
+    if (!steps.length || runLock.current) return;
+    runLock.current = true;
+    let currentStepId = steps[0]?.id ?? "";
     const qn = question.trim() || "Why is the sky blue?";
     setMsgs((m) => [...m, { role: "user", text: qn }]);
     setLogs([]); setQuestion("");
@@ -122,7 +130,7 @@ function Playground() {
     const notes: string[] = [];
     try {
       for (const s of steps) {
-        setRunning(s.id); setActiveId(s.id);
+        currentStepId = s.id; setRunning(s.id); setActiveId(s.id);
         const log = (text: string) => setLogs((l) => [...l, { stepId: s.id, text, ok: true }]);
         if (s.kind === "input") {
           context = s.instruction.includes("{question}") ? s.instruction.replace("{question}", qn) : `${s.instruction}\n${qn}`;
@@ -155,16 +163,16 @@ function Playground() {
       complete("first_run");
     } catch (e) {
       const t = e instanceof Error ? e.message : "Something went wrong";
-      setLogs((l) => [...l, { stepId: running ?? "", text: `Oops: ${t}`, ok: false }]);
-      setMsgs((m) => [...m, { role: "ai", text: `⚠️ ${t} Try the Offline Simulator in settings.` }]);
+      setLogs((l) => [...l, { stepId: currentStepId, text: `Oops: ${t}`, ok: false }]);
+      setMsgs((m) => [...m, { role: "ai", text: `Could not finish: ${t} Try the Offline Simulator in settings.` }]);
     }
-    setRunning(null);
+    setRunning(null); runLock.current = false;
   };
 
   const prov = settings.provider;
 
   return (
-    <Motion enabled={motion}><div className={`${retro ? "retro" : ""} min-h-screen bg-background text-foreground`}>
+    <Motion enabled={motion}><div className={`${retro ? "retro" : ""} min-h-screen text-foreground`}>
       {/* NAV */}
       <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b bg-background/85 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-2">
@@ -175,15 +183,15 @@ function Playground() {
           </div>
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-1.5 text-sm">
+          <div className="nav-stat">
             <span className="animate-pop" key={rank.name}><AnimatedIcon name="crown" /></span>
             <span className="font-bold">{rank.name}</span>
             <Info tip="Your level — earn XP by completing quests to rank up." />
           </div>
-          <div className="rounded-lg border bg-card px-3 py-1.5 text-sm font-bold text-primary"><AnimatedIcon name="spark" /> {points} XP</div>
-          <div className="flex items-center rounded-lg border bg-card px-3 py-1.5 text-sm font-bold text-coin"><AnimatedIcon name="coin" /> {coins}<Info tip="Token Coins — a fun reward you collect for finishing quests." /></div>
+          <div className="nav-stat font-bold text-primary"><AnimatedIcon name="spark" /> {points} XP</div>
+          <div className="nav-stat font-bold text-coin"><AnimatedIcon name="coin" /> {coins}<Info tip="Token Coins — a fun reward you collect for finishing quests." /></div>
           <Button variant="ghost" onClick={() => setShowHub(true)} className={`${btn} relative border bg-card hover:border-primary`}>
-            <AnimatedIcon name="tool" /> Explore Recipes
+            <AnimatedIcon name="tool" /> Explore Library
             <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">{RECIPES.length}</span>
           </Button>
           <Button variant="ghost" onClick={() => setShowSettings(true)} className={`${btn} bg-primary text-primary-foreground hover:brightness-110`}>
@@ -193,7 +201,7 @@ function Playground() {
       </header>
 
       <div className="mission-band relative z-10 px-5 py-3">
-        <div className="flex flex-wrap items-center gap-3 text-sm"><AnimatedIcon name="target" /><span className="font-bold">{QUESTS.find(q => q.id !== "konami" && !done.includes(q.id))?.title ?? "Adventure complete"}</span><span className="text-xs text-primary">{QUESTS.find(q => q.id !== "konami" && !done.includes(q.id)) ? `+${QUESTS.find(q => q.id !== "konami" && !done.includes(q.id))?.pts} XP` : "Keep experimenting"}</span><span className="ml-auto text-xs text-muted-foreground">{done.filter(id => id !== "konami").length} / 6 milestones</span><label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={motion} onChange={e => setMotion(e.target.checked)} />Motion<Info tip="Turn playful background waves, cursor chasing and click sparks on or off." /></label></div>
+        <div className="flex flex-wrap items-center gap-3 text-sm"><AnimatedIcon name="target" /><span className="font-bold">{QUESTS.find(q => q.id !== "konami" && !done.includes(q.id))?.title ?? "Adventure complete"}</span><span className="text-xs text-primary">{QUESTS.find(q => q.id !== "konami" && !done.includes(q.id)) ? `+${QUESTS.find(q => q.id !== "konami" && !done.includes(q.id))?.pts} XP` : "Keep experimenting"}</span><span className="ml-auto text-xs text-muted-foreground">{done.filter(id => id !== "konami").length} / 6 milestones</span></div>
         <progress aria-label="Adventure progress" value={done.filter(id => id !== "konami").length} max={6} />
       </div>
       <main className="langplay-workspace grid gap-4 p-4 lg:grid-cols-[minmax(250px,300px)_minmax(0,1fr)_minmax(250px,300px)]">
@@ -208,24 +216,26 @@ function Playground() {
             {steps.map((s, i) => (
               <li key={s.id}>
                 <StarFrame active={activeId === s.id || running === s.id}><div
-                  draggable
+                  draggable={!running}
+                  role="group"
+                  aria-label={`${s.label} step`}
                   onDragStart={() => setDragId(s.id)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => dropOn(s.id)}
                   onClick={() => setActiveId(s.id)}
-                  className={`group cursor-pointer rounded-lg border p-3 transition hover:border-primary/60 ${activeId === s.id ? "border-primary bg-primary/10" : "bg-secondary/40"} ${running === s.id ? "ring-2 ring-accent animate-pulse" : ""} ${dragId === s.id ? "opacity-40" : ""}`}
+                  className={`group recipe-step cursor-pointer rounded-lg border p-3 transition hover:border-primary/60 ${activeId === s.id ? "border-primary bg-primary/10" : "bg-secondary/40"} ${running === s.id ? "ring-2 ring-accent animate-pulse" : ""} ${dragId === s.id ? "opacity-40" : ""}`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="cursor-grab text-muted-foreground" title="Drag to reorder"><AnimatedIcon name="grip" /></span>
                     <span className="text-lg"><AnimatedIcon name={s.kind} /></span>
                     <div className="min-w-0 flex-1">
                       <div className="text-[10px] font-semibold uppercase text-muted-foreground">Step {i + 1}</div>
-                      <div className="truncate text-sm font-bold">{s.label}</div>
+                      <Button type="button" variant="ghost" className="h-auto max-w-full justify-start whitespace-normal px-0 py-0 text-left text-sm font-bold" onClick={() => setActiveId(s.id)}>{s.label}</Button>
                     </div>
-                    <div className="flex opacity-60 group-hover:opacity-100">
-                      <Button variant="ghost" title="Move up" size="icon" aria-label="Move up" onClick={(e) => { e.stopPropagation(); move(s.id, -1); }} className="h-7 w-6 rounded px-1 hover:bg-muted"><AnimatedIcon name="up" /></Button>
-                      <Button variant="ghost" title="Move down" size="icon" aria-label="Move down" onClick={(e) => { e.stopPropagation(); move(s.id, 1); }} className="h-7 w-6 rounded px-1 hover:bg-muted"><AnimatedIcon name="down" /></Button>
-                      <Button variant="ghost" title="Delete" size="icon" aria-label="Delete" onClick={(e) => { e.stopPropagation(); setSteps((x) => x.filter((y) => y.id !== s.id)); }} className="h-7 w-6 rounded px-1 text-destructive hover:bg-muted"><AnimatedIcon name="close" /></Button>
+                    <div className="flex items-center gap-0.5">
+                      <Button variant="ghost" disabled={!!running || i === 0} title="Move up" size="icon" aria-label="Move up" onClick={(e) => { e.stopPropagation(); move(s.id, -1); }} className="h-7 w-6 rounded px-1 hover:bg-muted"><AnimatedIcon name="up" /></Button>
+                      <Button variant="ghost" disabled={!!running || i === steps.length - 1} title="Move down" size="icon" aria-label="Move down" onClick={(e) => { e.stopPropagation(); move(s.id, 1); }} className="h-7 w-6 rounded px-1 hover:bg-muted"><AnimatedIcon name="down" /></Button>
+                      <HoldDelete disabled={!!running} onDelete={() => { setSteps(x => x.filter(y => y.id !== s.id)); if (activeId === s.id) setActiveId(null); }} />
                     </div>
                   </div>
                   {activeId === s.id && (
@@ -249,7 +259,7 @@ function Playground() {
             <Label tip="Add a new block to the end of your recipe.">Add a step</Label>
             <div className="grid grid-cols-2 gap-1.5">
               {(Object.keys(KINDS) as StepKind[]).map((k) => (
-                <Button variant="ghost" key={k} onClick={() => { const ns = mk(k); setSteps((s) => [...s, ns]); setActiveId(ns.id); if (steps.length >= 1) complete("connect2"); }} className="h-auto justify-start whitespace-normal rounded-lg border px-2 py-1.5 text-left text-xs transition hover:border-primary hover:bg-primary/10">
+                <Button variant="ghost" key={k} disabled={!!running} onClick={() => { const ns = mk(k); setSteps((s) => [...s, ns]); setActiveId(ns.id); if (steps.length >= 1) complete("connect2"); }} className="h-auto justify-start whitespace-normal rounded-lg border px-2 py-1.5 text-left text-xs transition hover:border-primary hover:bg-primary/10">
                   <AnimatedIcon name={k} /> {KINDS[k].title}
                 </Button>
               ))}
@@ -261,10 +271,9 @@ function Playground() {
         <section className="flex min-h-[600px] flex-col rounded-lg border bg-card/90">
           <div className="flex items-center justify-between border-b p-4">
             <h2 className="flex items-center font-bold"><AnimatedIcon name="chat" /> Live Run<Info tip="Type a question and watch your recipe work on it step by step." /></h2>
-            <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${running ? "bg-accent/20 text-accent" : "bg-success/15 text-success"}`}>
-              {running ? "● Running…" : "● Idle"}
-            </span>
+            <span className="text-xs text-success" role="status">{running ? "Running…" : "Idle"}</span>
           </div>
+          {(running || logs.length > 0) && <div className="border-b px-4 py-3"><RunThought working={!!running} label={`Working: ${steps.find(s => s.id === running)?.label ?? "recipe"}`} /></div>}
           <div className="flex-1 space-y-3 overflow-y-auto p-4">
             {msgs.length === 0 && (
               <div className="grid h-full place-items-center text-center text-muted-foreground">
@@ -322,18 +331,11 @@ function Playground() {
                   <Label tip="The official name programmers use for this piece.">Under the hood</Label>
                   <code className="rounded bg-primary/15 px-2 py-1 font-mono text-xs text-primary">{KINDS[active.kind].techName}</code>
                 </div>
-                <label className="flex cursor-pointer items-center gap-2 text-sm">
-                  <Button variant="ghost"
-                    role="switch"
-                    aria-checked={showCode}
-                    onClick={() => { setShowCode(!showCode); if (!showCode) complete("python"); }}
-                    aria-label="Show Python code" className={`relative h-5 w-9 min-w-9 p-0 rounded-full transition ${showCode ? "bg-primary" : "bg-muted"}`}
-                  >
-                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-foreground transition-all ${showCode ? "left-4.5" : "left-0.5"}`} />
-                  </Button>
+                <div className="flex items-center gap-2 text-sm">
+                  <SquishToggle label="Show Python code" checked={showCode} onChange={on => { setShowCode(on); if (on) complete("python"); }} />
                   Show Python code
                   <Info tip="Peek at the real code that would build this step — just for curiosity." />
-                </label>
+                </div>
                 {showCode && <pre className="animate-pop overflow-x-auto rounded-lg border bg-background p-3 font-mono text-[11px] leading-relaxed text-success">{KINDS[active.kind].code}</pre>}
               </div>
             ) : (
@@ -371,7 +373,7 @@ function Playground() {
         <div role="status" className="animate-pop fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-primary bg-card px-5 py-3 text-sm font-bold shadow-2xl"><AnimatedIcon name="trophy" /> {toast}</div>
       )}
 
-      <SettingsDrawer open={showSettings} onClose={() => setShowSettings(false)} settings={settings} setSettings={setSettings} onTested={() => complete("connect")} />
+      <SettingsDrawer open={showSettings} onClose={() => setShowSettings(false)} motion={motion} setMotion={setMotion} settings={settings} setSettings={setSettings} onTested={() => complete("connect")} />
       <RecipeHub open={showHub} onClose={() => setShowHub(false)} onInstall={install} />
     </div></Motion>
   );

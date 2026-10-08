@@ -5,15 +5,19 @@ import { Info, Label, inputCls, btn } from "./Info";
 import { Button } from "@/components/ui/button";
 import { AnimatedIcon } from "./AnimatedIcon";
 import { fetchModels, presetModels, MODEL_POLICY, type ModelOption } from "@/lib/lp-models";
+import { Overlay } from './Overlay';
+import { SquishToggle } from './EffectControls';
 
 export function SettingsDrawer({
-  open, onClose, settings, setSettings, onTested,
+  open, onClose, settings, setSettings, onTested, motion, setMotion,
 }: {
   open: boolean;
   onClose: () => void;
   settings: LlmSettings;
   setSettings: (s: LlmSettings) => void;
   onTested: () => void;
+  motion: boolean;
+  setMotion: (on: boolean) => void;
 }) {
   const [status, setStatus] = useState<"idle" | "testing" | "ok" | "bad">("idle");
   const [err, setErr] = useState("");
@@ -24,6 +28,7 @@ export function SettingsDrawer({
   const visibleModels = models.filter(m => !settings.freeOnly || m.free);
   const policy = MODEL_POLICY[settings.provider];
   const groups = [...new Set(PROVIDERS.map((p) => p.group))];
+  useEffect(() => { setStatus('idle'); setErr(''); }, [settings]);
 
   const pick = (id: ProviderId) => {
     const p = PROVIDERS.find((x) => x.id === id);
@@ -47,7 +52,8 @@ export function SettingsDrawer({
 
   return (
     <Overlay open={open} onClose={onClose}>
-      <h2 className="text-xl font-bold"><AnimatedIcon name="settings" /> AI Connection</h2>
+      <h2 className="text-xl font-bold"><AnimatedIcon name="settings" /> Settings</h2>
+      <div className="my-4 flex items-center gap-3 border-y py-4"><SquishToggle checked={motion} onChange={setMotion} label="Motion" /><span className="text-sm">Motion</span><Info tip="Turn letter animations, glowing borders, animated icons and click sparks on or off." /></div>
       <p className="mb-5 text-sm text-muted-foreground">Choose which AI brain powers your recipes.</p>
 
       <Label tip="Pick the company or app whose AI will answer your questions.">Provider</Label>
@@ -75,9 +81,9 @@ export function SettingsDrawer({
       </div>
 
       <div className="mb-5 space-y-3 border-y py-4">
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!settings.freeOnly} onChange={e => setSettings({ ...settings, freeOnly: e.target.checked, modelFreeVerified: models.some(m => m.id === settings.model && m.free) })} />Free models only<Info tip="Hide models that charge money or whose free allowance has not been confirmed." /></label>
+        <div className="flex items-center gap-2 text-sm"><SquishToggle label="Free models only" checked={!!settings.freeOnly} onChange={on => setSettings({ ...settings, freeOnly: on, modelFreeVerified: models.some(m => m.id === settings.model && m.free) })} />Free models only<Info tip="Hide models that charge money or whose free allowance has not been confirmed." /></div>
         {policy && <><p className="text-xs text-muted-foreground">{policy.note} <a className="text-primary underline" href={policy.url} target="_blank" rel="noreferrer">Provider policy</a></p>
-        {!["openrouter", "puter"].includes(settings.provider) && <label className="flex items-start gap-2 text-xs"><input type="checkbox" checked={!!settings.freeAllowance} onChange={e => setSettings({ ...settings, freeAllowance: e.target.checked, modelFreeVerified: false })} />My key has an active free / trial allowance<Info tip="Confirm this in your provider account; Langplay cannot see your balance or plan." /></label>}</>}
+        {!["openrouter", "puter"].includes(settings.provider) && <div className="flex items-center gap-2 text-xs"><SquishToggle label="Active free or trial allowance" checked={!!settings.freeAllowance} onChange={on => setSettings({ ...settings, freeAllowance: on, modelFreeVerified: false })} /><span>My key has an active free / trial allowance</span><Info tip="Confirm this in your provider account; Langplay cannot see your balance or plan." /></div>}</>}
         <Button variant="outline" size="sm" onClick={async () => { setModelStatus("Loading…"); try { const list = await fetchModels(settings); setModels(list); setModelStatus(`${list.length} models loaded`); setSettings({ ...settings, modelFreeVerified: list.some(m => m.id === settings.model && m.free) }); } catch(e) { setModelStatus(e instanceof Error ? e.message : "Could not load models"); } }}><AnimatedIcon name="spark" />Refresh models</Button><Info tip="Ask this provider for its current model list; some services block direct browser requests." />
         {modelStatus && <p className="text-xs text-muted-foreground" role="status">{modelStatus}</p>}
         <Label tip="Pick a suggested model; labels say whether its price or allowance qualifies.">Available models ({visibleModels.length})</Label>
@@ -119,14 +125,3 @@ export function SettingsDrawer({
   );
 }
 
-export function Overlay({ open, onClose, children, wide }: { open: boolean; onClose: () => void; children: React.ReactNode; wide?: boolean }) {
-  return (
-    <div className={`fixed inset-0 z-40 overflow-hidden transition ${open ? "" : "pointer-events-none"}`}>
-      <div onClick={onClose} className={`absolute inset-0 bg-background/70 backdrop-blur-sm transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
-      <aside aria-label={wide ? "Recipe library" : "AI connection panel"} aria-hidden={!open} inert={!open} className={`absolute right-0 top-0 h-full w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-6 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}>
-        <Button variant="ghost" onClick={onClose} aria-label="Close" size="icon" className="absolute right-4 top-4 rounded-md text-muted-foreground hover:bg-secondary"><AnimatedIcon name="close" /></Button>
-        {children}
-      </aside>
-    </div>
-  );
-}

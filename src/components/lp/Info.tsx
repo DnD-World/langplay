@@ -1,17 +1,13 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 export function Info({ tip }: { tip: string }) {
   return (
-    <span className="group relative inline-flex align-middle">
-      <span
+    <TooltipProvider delayDuration={150}><Tooltip><TooltipTrigger asChild><span
         tabIndex={0}
         aria-label={tip}
         className="ml-1 inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-primary/50 text-[10px] font-bold text-primary transition hover:bg-primary hover:text-primary-foreground"
-      >
-        ?
-      </span>
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border bg-popover px-3 py-2 text-xs font-normal normal-case leading-snug text-popover-foreground opacity-0 shadow-xl transition group-hover:opacity-100 group-focus-within:opacity-100">
-        {tip}
-      </span>
-    </span>
+        onClick={e => e.stopPropagation()}
+      >?</span></TooltipTrigger><TooltipContent side="bottom" avoidCollisions collisionPadding={12} className="z-[100] max-w-64 border bg-popover text-popover-foreground leading-relaxed">{tip}</TooltipContent></Tooltip></TooltipProvider>
   );
 }
 
