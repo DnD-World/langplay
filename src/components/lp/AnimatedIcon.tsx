@@ -8,5 +8,5 @@ const icons = {
 };
 export function AnimatedIcon({ name, className = "" }: { name: keyof typeof icons; className?: string }) {
   const Icon = icons[name];
-  return <span className={`animated-icon ${className}`} aria-hidden="true"><Icon strokeWidth={1.7} /></span>;
+  return <span className={`animated-icon icon-${name} ${className}`} aria-hidden="true"><Icon strokeWidth={1.7} /></span>;
 }

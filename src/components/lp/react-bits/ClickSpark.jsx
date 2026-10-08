@@ -3,7 +3,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 
 const ClickSpark = ({
-  sparkColor = '#fff',
+  sparkColor = 'var(--primary)',
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
@@ -20,13 +20,10 @@ const ClickSpark = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
     let resizeTimeout;
 
     const resizeCanvas = () => {
-      const { width, height } = parent.getBoundingClientRect();
+      const width = window.innerWidth, height = window.innerHeight;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -38,13 +35,12 @@ const ClickSpark = ({
       resizeTimeout = setTimeout(resizeCanvas, 100);
     };
 
-    const ro = new ResizeObserver(handleResize);
-    ro.observe(parent);
+    window.addEventListener('resize', handleResize);
 
     resizeCanvas();
 
     return () => {
-      ro.disconnect();
+      window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
     };
   }, []);
@@ -106,55 +102,27 @@ const ClickSpark = ({
         return true;
       });
 
-      animationId = requestAnimationFrame(draw);
+      animationId = sparksRef.current.length ? requestAnimationFrame(draw) : null;
     };
 
-    animationId = requestAnimationFrame(draw);
+    const click = e => {
+      const now = performance.now();
+      sparksRef.current.push(...Array.from({ length: sparkCount }, (_, i) => ({ x: e.clientX, y: e.clientY, angle: (2 * Math.PI * i) / sparkCount, startTime: now })));
+      if (!animationId) animationId = requestAnimationFrame(draw);
+    };
+    document.addEventListener('click', click, true);
 
     return () => {
       cancelAnimationFrame(animationId);
+      document.removeEventListener('click', click, true);
     };
   }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
-  const handleClick = e => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const now = performance.now();
-    const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
-      x,
-      y,
-      angle: (2 * Math.PI * i) / sparkCount,
-      startTime: now
-    }));
-
-    sparksRef.current.push(...newSparks);
-  };
-
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%'
-      }}
-      onClick={handleClick}
-    >
+    <div className="spark-content">
       <canvas
         ref={canvasRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'block',
-          userSelect: 'none',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          pointerEvents: 'none'
-        }}
+        className="spark-canvas" aria-hidden="true"
       />
       {children}
     </div>

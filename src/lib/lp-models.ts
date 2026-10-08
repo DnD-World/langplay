@@ -33,9 +33,11 @@ export async function fetchModels(s: LlmSettings): Promise<ModelOption[]> {
   if (['simulator', 'puter'].includes(s.provider)) return presetModels(s);
   const headers: Record<string, string> = {};
   if (s.apiKey && s.provider !== 'openrouter') headers['Authorization'] = `Bearer ${s.apiKey}`;
-  const response = await fetch(`${s.baseUrl.replace(/\/$/, '')}/models`, { headers, signal: AbortSignal.timeout(15000) });
+  const endpoint = new URL(`${s.baseUrl.replace(/\/$/, '')}/models`);
+  if (endpoint.protocol !== 'https:' && !(endpoint.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname))) throw new Error('Use HTTPS, or a local service on your own computer.');
+  const response = await fetch(endpoint, { headers, signal: AbortSignal.timeout(15000), credentials: 'omit' });
   if (!response.ok) throw new Error(`Model list failed (${response.status}): ${(await response.text()).slice(0, 250)}`);
   const body = await response.json();
-  if (!Array.isArray(body.data)) throw new Error('This service did not return a compatible model list. Use the suggested models instead.');
-  return body.data.filter((m: { id?: unknown }) => typeof m.id === 'string').map((m: { id: string; pricing?: { prompt?: string; completion?: string } }) => classifyModel(s.provider, m.id, !!s.freeAllowance, m.pricing));
+  if (!body || !Array.isArray(body.data)) throw new Error('This service did not return a compatible model list. Use the suggested models instead.');
+  return body.data.filter((m: { id?: unknown } | null) => m && typeof m.id === 'string').map((m: { id: string; pricing?: { prompt?: string; completion?: string } }) => classifyModel(s.provider, m.id, !!s.freeAllowance, m.pricing));
 }

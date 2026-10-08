@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
-const Waves = lazy(() => import('./react-bits/Waves.jsx'));
-const TargetCursor = lazy(() => import('./react-bits/TargetCursor.jsx'));
+const LetterGlitch = lazy(() => import('./react-bits/LetterGlitch'));
 const ClickSpark = lazy(() => import('./react-bits/ClickSpark.jsx'));
+import BorderGlow from './react-bits/BorderGlow';
 
 export function Motion({ children, enabled }: { children: ReactNode; enabled: boolean }) {
   const [ready, setReady] = useState(false);
@@ -13,18 +13,13 @@ export function Motion({ children, enabled }: { children: ReactNode; enabled: bo
     setColor(getComputedStyle(document.documentElement).getPropertyValue('--primary').trim());
     return () => media.removeEventListener('change', update);
   }, []);
-  if (!enabled || !ready || !color) return <>{children}</>;
-  return <Suspense fallback={children}>
-    <div className="motion-background" aria-hidden="true"><Waves lineColor={color} xGap={65} yGap={55} waveAmpX={12} waveAmpY={8} /></div>
-    <TargetCursor targetSelector="button, a, [draggable]" hideDefaultCursor={false} cursorColor={color} parallaxOn={false} />
-    <ClickSpark sparkColor={color}>{children}</ClickSpark>
-  </Suspense>;
+  return <>{enabled && ready && color && <Suspense fallback={null}>
+    <div className="motion-background" aria-hidden="true"><LetterGlitch glitchColors={[color]} glitchSpeed={180} centerVignette={false} outerVignette={false} smooth characters="LANGPLAY 01 + →" /></div>
+    <ClickSpark sparkColor={color} />
+  </Suspense>}{children}</>;
 }
 
-// Adapted from React Bits StarBorder by David Haz; license in react-bits/LICENSE.md.
+// Adapted from React Bits BorderGlow by David Haz; license in react-bits/LICENSE.md.
 export function StarFrame({ children, active }: { children: ReactNode; active: boolean }) {
-  return <div className={`star-frame ${active ? 'star-frame-active' : ''}`}>
-    {active && <><span className="border-gradient-bottom" /><span className="border-gradient-top" /></>}
-    <div className="star-inner">{children}</div>
-  </div>;
+  return <BorderGlow className={`star-frame ${active ? 'star-frame-active' : ''}`} animated={active}>{children}</BorderGlow>;
 }
