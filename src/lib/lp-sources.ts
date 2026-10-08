@@ -14,23 +14,32 @@ export async function listSource(repo: string): Promise<SourceFile[]> {
   if (!SOURCES.some(s => s.id === repo)) throw new Error('Unknown recipe source.');
   const info = await readJson(`https://api.github.com/repos/${repo}`);
   const data = await readJson(`https://api.github.com/repos/${repo}/git/trees/${encodeURIComponent(info.default_branch)}?recursive=1`);
-  return (data.tree ?? []).filter((entry: { type: string; path: string }) => entry.type === 'blob' && /\.(ipynb|py|md)$/.test(entry.path) && !/LICENSE|README|__init__/.test(entry.path)).map((entry: { path: string }) => ({
+  if (!Array.isArray(data?.tree)) throw new Error('This collection returned no readable file list.');
+  return data.tree.filter((entry: { type: string; path: string } | null) => entry && entry.type === 'blob' && typeof entry.path === 'string' && /\.(ipynb|py|md)$/.test(entry.path) && !/LICENSE|README|__init__/.test(entry.path)).map((entry: { path: string }) => ({
     path: entry.path, repo, url: `https://github.com/${repo}/blob/${info.default_branch}/${entry.path}`,
     raw: `https://raw.githubusercontent.com/${repo}/${info.default_branch}/${entry.path}`,
   }));
 }
-export async function readSource(file: SourceFile): Promise<{ text: string; prompts: string[] }> {
+export async function readSource(file: SourceFile): Promise<{ text: string; prompts: string[]; overview: string; requirements: string[] }> {
   const response = await fetch(file.raw, { signal: AbortSignal.timeout(20000) });
   if (!response.ok) throw new Error(`Could not open this example (${response.status}).`);
   let text = await response.text();
+  if (text.length > 2000000) throw new Error('This example is too large for a safe preview. Open the original instead.');
+  let prose = file.path.endsWith('.md') ? text : '';
   if (file.path.endsWith('.ipynb')) {
     const notebook = JSON.parse(text);
-    text = (notebook.cells ?? []).map((c: { source?: string[] | string }) => Array.isArray(c.source) ? c.source.join('') : c.source ?? '').join('\n\n');
+    if (!Array.isArray(notebook?.cells)) throw new Error('This notebook has no readable cells.');
+    const cellText = (c: { source?: unknown }) => Array.isArray(c.source) ? c.source.filter(s => typeof s === 'string').join('') : typeof c.source === 'string' ? c.source : '';
+    prose = notebook.cells.filter((c: { cell_type?: string } | null) => c?.cell_type === 'markdown').map(cellText).join('\n\n');
+    text = notebook.cells.filter(Boolean).map(cellText).join('\n\n');
   }
   const prompts = [...text.matchAll(/(?:template|system_prompt|prompt)\s*=\s*(?:[fr])?(?:"""([\s\S]*?)"""|'''([\s\S]*?)'''|"([^"\n]{25,})"|'([^'\n]{25,})')/gi)]
     .map(m => m[1] ?? m[2] ?? m[3] ?? m[4] ?? '').filter(Boolean);
   for (const match of text.matchAll(/(?:from_template|PromptTemplate)\s*\(\s*(?:template\s*=\s*)?(?:[fr])?(?:"""([\s\S]*?)"""|'''([\s\S]*?)'''|"([^"\n]{25,})"|'([^'\n]{25,})')/gi)) prompts.push(match[1] ?? match[2] ?? match[3] ?? match[4] ?? '');
-  return { text, prompts: [...new Set(prompts)] };
+  for (const match of text.matchAll(/\(\s*["'](?:system|human|user)["']\s*,\s*(?:[fr])?(?:"""([\s\S]*?)"""|'''([\s\S]*?)'''|"([^"\n]{10,})"|'([^'\n]{10,})')/gi)) prompts.push(match[1] ?? match[2] ?? match[3] ?? match[4] ?? '');
+  const overview = prose.split(/\n\s*\n/).map(p => p.replace(/^#+\s*/gm, '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*`]/g, '').trim()).find(p => p.length > 50 && !/^(?:!\[|<|%|pip |!pip|import )/.test(p))?.slice(0, 1200) ?? '';
+  const requirements = [...new Set([...text.matchAll(/\b([A-Z][A-Z0-9_]*(?:API_KEY|TOKEN|BASE_URL))\b/g)].map(m => m[1] ?? '').filter(Boolean))].slice(0, 12);
+  return { text, prompts: [...new Set(prompts)].filter(Boolean), overview, requirements };
 }
 function collectTemplates(value: unknown, result: string[]) {
   if (!value || typeof value !== 'object') return;

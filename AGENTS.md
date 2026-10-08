@@ -17,3 +17,5 @@
 - Extension discovery uses a typed, source-attributed catalogue with explicit access and execution status; external services require separate consent and are never silently installed.
 - External recipe JSON is schema-validated and previewed before installation; imported prompt variables must be filled before running.
 - React Bits micro-controls use the shared Button and semantic theme tokens; browser-heavy effects load after hydration, with cleanup for timers and drawing loops.
+- Motion effects mount as siblings of page content so changing animation preferences cannot remount the playground or discard unsaved work.
+- Async connection and model-list results are applied only to the settings snapshot that started them, preventing late responses from overwriting a new provider selection.
