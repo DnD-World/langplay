@@ -139,6 +139,7 @@ export interface Recipe {
   categories: Category[];
   tools: string[];
   cost: "Cheap" | "Medium";
+  source?: string;
   steps: { kind: StepKind; instruction: string; label?: string }[];
 }
 
@@ -241,20 +242,28 @@ export const CATEGORIES: Category[] = ["Beginner Friendly", "Multi-Agent", "Docu
 
 export type ProviderId =
   | "simulator" | "pollinations" | "puter" | "horde" | "ovh" | "ollama" | "lmstudio"
-  | "openai" | "openrouter" | "groq" | "kilo" | "custom";
+  | "openai" | "openrouter" | "groq" | "kilo" | "custom"
+  | "cerebras" | "nvidia" | "mistral" | "cohere" | "ollama-cloud" | "sealion" | "meganova";
 
 export const PROVIDERS: { id: ProviderId; name: string; group: string; baseUrl: string; model: string; models: string[]; needsKey: boolean; tip: string }[] = [
   { id: "simulator", name: "Offline Simulator", group: "Instant & offline", baseUrl: "", model: "sim-1", models: ["sim-1"], needsKey: false, tip: "Pretend AI that answers instantly without the internet — perfect for practice." },
   { id: "pollinations", name: "Pollinations AI", group: "Free · no key", baseUrl: "https://text.pollinations.ai/openai", model: "openai", models: ["openai", "mistral", "llama"], needsKey: false, tip: "A free AI service you can use without signing up." },
-  { id: "puter", name: "Puter AI", group: "Free · no key", baseUrl: "puter.js", model: "gpt-4o-mini", models: ["gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet"], needsKey: false, tip: "Free chat AI that runs through Puter, with no login needed." },
+  { id: "puter", name: "Puter AI", group: "No API key", baseUrl: "puter.js", model: "gpt-4o-mini", models: ["gpt-4o-mini", "gpt-4o", "claude-3-5-sonnet"], needsKey: false, tip: "Puter handles payment and sign-in for you; usage is not automatically free." },
   { id: "horde", name: "AI Horde", group: "Free · no key", baseUrl: "https://oai.aihorde.net/v1", model: "koboldcpp/Llama-3", models: ["koboldcpp/Llama-3"], needsKey: false, tip: "Volunteers share their computers to run AI for free — can be slow." },
   { id: "ovh", name: "OVHcloud AI Endpoints", group: "Free · no key", baseUrl: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1", model: "Mistral-7B-Instruct-v0.3", models: ["Mistral-7B-Instruct-v0.3", "Meta-Llama-3_1-70B-Instruct"], needsKey: false, tip: "A European cloud that offers a free, limited AI tier." },
   { id: "ollama", name: "Ollama (local)", group: "On your computer", baseUrl: "http://localhost:11434/v1", model: "llama3", models: ["llama3", "mistral", "phi3"], needsKey: false, tip: "Runs AI on your own computer — private and free once installed." },
   { id: "lmstudio", name: "LM Studio (local)", group: "On your computer", baseUrl: "http://localhost:1234/v1", model: "local-model", models: ["local-model"], needsKey: false, tip: "A desktop app that runs AI on your own computer." },
   { id: "openai", name: "OpenAI", group: "Bring your own key", baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini", models: ["gpt-4o-mini", "gpt-4o"], needsKey: true, tip: "The makers of ChatGPT — needs your own paid key." },
-  { id: "openrouter", name: "OpenRouter", group: "Bring your own key", baseUrl: "https://openrouter.ai/api/v1", model: "meta-llama/llama-3.1-8b-instruct:free", models: ["meta-llama/llama-3.1-8b-instruct:free", "mistralai/mistral-7b-instruct:free"], needsKey: true, tip: "One key that unlocks many different AI models." },
+  { id: "openrouter", name: "OpenRouter", group: "Bring your own key", baseUrl: "https://openrouter.ai/api/v1", model: "openrouter/free", models: ["openrouter/free", "openai/gpt-4o-mini"], needsKey: true, tip: "One key that unlocks many different AI models; the free router picks a free model." },
   { id: "groq", name: "Groq", group: "Bring your own key", baseUrl: "https://api.groq.com/openai/v1", model: "llama-3.1-8b-instant", models: ["llama-3.1-8b-instant", "mixtral-8x7b-32768"], needsKey: true, tip: "Super-fast AI answers — needs a free account key." },
   { id: "kilo", name: "Kilo Gateway", group: "Bring your own key", baseUrl: "https://api.kilocode.ai/v1", model: "gpt-4o-mini", models: ["gpt-4o-mini"], needsKey: true, tip: "A gateway that passes your requests to many AI models." },
+  { id: "cerebras", name: "Cerebras", group: "Bring your own key", baseUrl: "https://api.cerebras.ai/v1", model: "gpt-oss-120b", models: ["gpt-oss-120b"], needsKey: true, tip: "Fast AI with a limited free account tier and paid plans." },
+  { id: "nvidia", name: "NVIDIA NIM", group: "Bring your own key", baseUrl: "https://integrate.api.nvidia.com/v1", model: "meta/llama-3.1-8b-instruct", models: ["meta/llama-3.1-8b-instruct"], needsKey: true, tip: "Try NVIDIA-hosted models with limited developer trial credits." },
+  { id: "mistral", name: "Mistral", group: "Bring your own key", baseUrl: "https://api.mistral.ai/v1", model: "mistral-small-latest", models: ["mistral-small-latest", "mistral-large-latest"], needsKey: true, tip: "European AI with a limited experiment plan and paid production plans." },
+  { id: "cohere", name: "Cohere", group: "Bring your own key", baseUrl: "https://api.cohere.ai/compatibility/v1", model: "command-r7b-12-2024", models: ["command-r7b-12-2024", "command-a-03-2025"], needsKey: true, tip: "Writing and document AI; trial keys have limited evaluation usage." },
+  { id: "ollama-cloud", name: "Ollama Cloud", group: "Bring your own key", baseUrl: "https://ollama.com/v1", model: "gpt-oss:120b", models: ["gpt-oss:120b", "deepseek-v3.1"], needsKey: true, tip: "Run large Ollama models online using your account's cloud allowance." },
+  { id: "sealion", name: "SEA-LION", group: "Bring your own key", baseUrl: "https://api.sea-lion.ai/v1", model: "aisingapore/Qwen-SEA-LION-v4.5-27B-IT", models: ["aisingapore/Qwen-SEA-LION-v4.5-27B-IT", "aisingapore/Llama-SEA-LION-v3.5-70B-R"], needsKey: true, tip: "Southeast Asian language models with a limited proof-of-concept API." },
+  { id: "meganova", name: "Meganova", group: "Bring your own key", baseUrl: "https://api.meganova.ai/v1", model: "meganova-ai/manta-mini-1.0", models: ["meganova-ai/manta-mini-1.0", "meganova-ai/manta-flash-1.0", "meganova-ai/manta-pro-1.0", "zai-org/GLM-4.7-Flash"], needsKey: true, tip: "Selected models have daily free quotas that depend on your account tier." },
   { id: "custom", name: "Custom (OpenAI-compatible)", group: "Bring your own key", baseUrl: "", model: "", models: [], needsKey: false, tip: "Any other AI service that speaks the same language as OpenAI." },
 ];
 

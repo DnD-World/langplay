@@ -3,6 +3,9 @@ export interface LlmSettings {
   baseUrl: string;
   apiKey: string;
   model: string;
+  freeOnly?: boolean;
+  freeAllowance?: boolean;
+  modelFreeVerified?: boolean;
 }
 
 type Msg = { role: "system" | "user" | "assistant"; content: string };
@@ -20,7 +23,8 @@ async function loadPuter() {
     s.onerror = () => rej(new Error("Could not load Puter"));
     document.head.appendChild(s);
   });
-  return window.puter!;
+  if (!window.puter) throw new Error("Puter did not finish loading.");
+  return window.puter;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -33,6 +37,9 @@ function simulate(messages: Msg[]): string {
 }
 
 export async function chat(s: LlmSettings, messages: Msg[]): Promise<string> {
+  if (s.freeOnly && !s.modelFreeVerified && !['simulator', 'ollama', 'lmstudio', 'horde'].includes(s.provider)) {
+    throw new Error('Choose a qualifying model from the free-only list before running.');
+  }
   if (s.provider === "simulator") {
     await sleep(500 + Math.random() * 500);
     return simulate(messages);
@@ -50,7 +57,7 @@ export async function chat(s: LlmSettings, messages: Msg[]): Promise<string> {
   if (s.apiKey) headers["Authorization"] = `Bearer ${s.apiKey}`;
   else if (s.provider === "horde") headers["Authorization"] = "Bearer 0000000000";
   const res = await fetch(url, { method: "POST", headers, body: JSON.stringify({ model: s.model, messages }) });
-  if (!res.ok) throw new Error(`The AI service replied with an error (${res.status}).`);
+  if (!res.ok) throw new Error(`The AI service replied (${res.status}): ${(await res.text()).slice(0, 400)}`);
   const j = await res.json();
   return j?.choices?.[0]?.message?.content ?? "(empty answer)";
 }
