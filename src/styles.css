@@ -107,7 +107,7 @@ button:hover .animated-icon, .group:hover .animated-icon { animation: icon-wiggl
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 .langplay-workspace > section { min-width: 0; }
-body { overflow-x: clip; }
+html, body { overflow-x: clip; }
 .langplay-workspace code { overflow-wrap: anywhere; white-space: normal; }
 .langplay-workspace button .animated-icon { color: currentColor; }
 .star-frame .star-inner > div { border-radius: 7px; }
