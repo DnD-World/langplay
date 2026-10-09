@@ -14,7 +14,7 @@ export function SquishToggle({ checked, onChange, label }: { checked: boolean; o
 export function HoldDelete({ onDelete, disabled }: { onDelete: () => void; disabled: boolean }) {
   const ready = useReady();
   const fallback = <Button type="button" variant="outline" size="icon" disabled title="Hold to delete step"><AnimatedIcon name="close" /></Button>;
-  return ready ? <Suspense fallback={fallback}><HoldButton disabled={disabled} size="sm" holdTime={1200} onHold={onDelete} className="hold-delete" icon={<AnimatedIcon name="close" />} doneLabel="Deleted"> <span className="sr-only">Hold to delete step</span></HoldButton></Suspense> : fallback;
+  return ready ? <Suspense fallback={fallback}><HoldButton disabled={disabled} size="sm" holdTime={1200} onHold={onDelete} className="hold-delete" icon={<AnimatedIcon name="close" />} doneLabel="Deleted">{null}</HoldButton></Suspense> : fallback;
 }
 export function RunThought({ working, label }: { working: boolean; label: string }) {
   const ready = useReady();

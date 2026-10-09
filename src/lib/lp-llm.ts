@@ -30,6 +30,16 @@ async function loadPuter() {
   return window.puter;
 }
 
+/** AI Horde models change as volunteers come and go, so pick a live one instead of a fixed name. */
+async function pickHordeModel(baseUrl: string): Promise<string> {
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/models`, { signal: AbortSignal.timeout(15000), credentials: "omit" });
+  if (!response.ok) throw new Error(`AI Horde model list failed (${response.status}).`);
+  const body = await response.json();
+  const id = Array.isArray(body?.data) ? body.data.find((m: { id?: unknown } | null) => typeof m?.id === "string")?.id : undefined;
+  if (!id) throw new Error("No AI Horde volunteers are online right now. Try another provider.");
+  return id;
+}
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function simulate(messages: Msg[]): string {
@@ -62,7 +72,9 @@ export async function chat(s: LlmSettings, messages: Msg[]): Promise<string> {
   else if (s.provider === "horde") headers["Authorization"] = "Bearer 0000000000";
   const endpoint = new URL(url);
   if (endpoint.protocol !== 'https:' && !(endpoint.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname))) throw new Error('Use HTTPS, or a local service on your own computer.');
-  const res = await fetch(url, { method: "POST", headers, signal: AbortSignal.timeout(60000), body: JSON.stringify({ model: s.model, messages }) });
+  let model = s.model;
+  if (s.provider === "horde" && (!model || model === "auto")) model = await pickHordeModel(s.baseUrl);
+  const res = await fetch(url, { method: "POST", headers, signal: AbortSignal.timeout(60000), body: JSON.stringify({ model, messages }) });
   if (!res.ok) throw new Error(`The AI service replied (${res.status}): ${(await res.text()).slice(0, 400)}`);
   const j = await res.json();
   const content = j?.choices?.[0]?.message?.content;

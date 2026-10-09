@@ -304,7 +304,7 @@ const HoldButton: React.FC<HoldButtonProps> = ({
       onContextMenu={e => e.preventDefault()}
     >
       <span className="hold-button__pulse" aria-hidden="true" />
-      <span className="hold-button__label">{labels}</span>
+      <span className="hold-button__label" aria-hidden="true">{labels}</span>
       <span className="hold-button__clip" aria-hidden="true">
         <span className="hold-button__fill">
           <span className="hold-button__label hold-button__label--fill">{labels}</span>

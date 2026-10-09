@@ -34,7 +34,7 @@ const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "Ar
 function Playground() {
   const [steps, setSteps] = useState<Step[]>(defaultSteps);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [settings, setSettings] = useState<LlmSettings>({ provider: "simulator", baseUrl: "", apiKey: "", model: "sim-1" });
+  const [settings, setSettings] = useState<LlmSettings>({ provider: "pollinations", baseUrl: "https://text.pollinations.ai/openai", apiKey: "", model: "openai" });
   const [showSettings, setShowSettings] = useState(false);
   const [showHub, setShowHub] = useState(false);
   const [question, setQuestion] = useState("");
@@ -151,10 +151,17 @@ function Playground() {
           notes.push(`Routed to: ${path}`);
           log(`Looked at the question and sent it to the ${path}.`);
         } else {
-          const out = await chat(settings, [
-            { role: "system", content: `${s.instruction.replaceAll("{question}", qn)} Keep it short and beginner-friendly.` },
-            { role: "user", content: `${context}${notes.length ? `\n\nNotes so far:\n${notes.join("\n")}` : ""}${answer ? `\n\nPrevious draft:\n${answer}` : ""}` },
-          ]);
+          const prompt = [
+            { role: "system" as const, content: `${s.instruction.replaceAll("{question}", qn)} Keep it short and beginner-friendly.` },
+            { role: "user" as const, content: `${context}${notes.length ? `\n\nNotes so far:\n${notes.join("\n")}` : ""}${answer ? `\n\nPrevious draft:\n${answer}` : ""}` },
+          ];
+          let out: string;
+          try { out = await chat(settings, prompt); }
+          catch (e) {
+            if (settings.provider === "simulator") throw e;
+            out = await chat({ ...settings, provider: "simulator" }, prompt);
+            log(`${PROVIDERS.find(p => p.id === settings.provider)?.name ?? "The AI service"} did not answer (${e instanceof Error ? e.message.slice(0, 120) : "error"}), so the practice Simulator answered this step.`);
+          }
           answer = out;
           log(s.kind === "critic" ? "Reviewed the draft and rewrote the weak parts." : s.kind === "final" ? "Polished everything into the final answer." : `Thought it over and wrote a draft (${out.length} characters).`);
         }
