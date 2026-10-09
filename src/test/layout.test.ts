@@ -21,13 +21,13 @@ describe("graph view", () => {
   });
   it("lays out branches side by side and keeps saved positions", () => {
     const pos = layoutRecipe(byId("router"));
-    expect(pos.billing!.y).toBe(pos.tech!.y);
-    expect(pos.billing!.x).toBeLessThan(pos.tech!.x);
-    expect(pos.final!.y).toBeGreaterThan(pos.billing!.y);
+    expect(pos["billing"]!.y).toBe(pos["tech"]!.y);
+    expect(pos["billing"]!.x).toBeLessThan(pos["tech"]!.x);
+    expect(pos["final"]!.y).toBeGreaterThan(pos["billing"]!.y);
     const moved = {
       ...byId("router"),
       nodes: byId("router").nodes.map((n) => (n.id === "in" ? { ...n, x: 5, y: 7 } : n)),
     };
-    expect(layoutRecipe(moved).in).toEqual({ x: 5, y: 7 });
+    expect(layoutRecipe(moved)["in"]).toEqual({ x: 5, y: 7 });
   });
 });
