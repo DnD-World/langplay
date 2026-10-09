@@ -1,0 +1,22 @@
+Langplay
+Copyright (c) 2026 Lambros Stravelakis
+
+This product includes third-party work:
+
+- React Bits (https://reactbits.dev), Copyright (c) 2026 David Haz.
+  License: MIT + Commons Clause v1.0 (full text in src/components/lp/react-bits/LICENSE.md).
+  Used for: BorderGlow, ClickSpark, HoldButton, LetterGlitch, SquishSwitch, TargetCursor,
+  ThoughtLine and Waves in src/components/lp/react-bits/. The components themselves must not be
+  sold or redistributed on their own; exported spin-out files do not include them.
+
+- shadcn/ui (https://ui.shadcn.com), Copyright (c) 2023 shadcn.
+  License: MIT. Used for: src/components/ui/.
+
+- Lucide icons (https://lucide.dev), Copyright (c) Lucide Contributors.
+  License: ISC. Used for: icons across the app.
+
+- Google Fonts: Bricolage Grotesque, JetBrains Mono, Press Start 2P.
+  License: SIL Open Font License 1.1. Used for: app typography.
+
+- Recipes and prompts imported at run time from LangChain cookbooks (https://github.com/langchain-ai)
+  and the LangChain Hub keep a link to their original source and authors; they are not bundled.

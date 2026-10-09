@@ -1,46 +1,341 @@
-import { z } from 'zod';
-import { KINDS, type Recipe } from './lp-data';
+import { normalizeRecipe, type Recipe } from "@/engine";
 
-export type LibraryKind = 'Tools' | 'MCPs' | 'Plugins' | 'Skills';
-export type LibraryEntry = { name: string; kind: LibraryKind; category: string; summary: string; needs: string; next: string; url: string; docs: string; access: 'Account/key' | 'Local setup' | 'Public reading'; status: 'External setup' | 'Prompt adaptation' };
+export type LibraryKind = "Tools" | "MCPs" | "Plugins" | "Skills";
+export type LibraryEntry = {
+  name: string;
+  kind: LibraryKind;
+  category: string;
+  summary: string;
+  needs: string;
+  next: string;
+  url: string;
+  docs: string;
+  access: "Account/key" | "Local setup" | "Public reading";
+  status: "External setup" | "Prompt adaptation";
+};
 export const LIBRARY: LibraryEntry[] = [
-  { name: 'LangChain tool integrations', kind: 'Tools', category: 'Collections', summary: 'Browse search, files, calculators and hundreds of service tools by what they do.', needs: 'Each tool has its own account and setup requirements.', next: 'Choose a tool in the directory and review its input, permissions and pricing.', url: 'https://docs.langchain.com/oss/python/integrations/tools', docs: 'https://docs.langchain.com/oss/python/integrations/tools', access: 'Public reading', status: 'External setup' },
-  { name: 'Tavily', kind: 'Tools', category: 'Search & research', summary: 'Find web sources and return readable evidence for fact-checking recipes.', needs: 'Tavily account and API key; usage limits apply.', next: 'Review search options and create a key before connecting live search.', url: 'https://tavily.com/', docs: 'https://docs.tavily.com/', access: 'Account/key', status: 'External setup' },
-  { name: 'Brave Search', kind: 'Tools', category: 'Search & research', summary: 'Search the web and get source links without relying on made-up results.', needs: 'Brave Search API subscription and key.', next: 'Check your plan and the search response fields.', url: 'https://brave.com/search/api/', docs: 'https://api-dashboard.search.brave.com/app/documentation/web-search', access: 'Account/key', status: 'External setup' },
-  { name: 'Wikipedia', kind: 'Tools', category: 'Search & research', summary: 'Look up encyclopedia articles for definitions and background reading.', needs: 'Public reading; API rate limits and attribution apply.', next: 'Read the article and cite its original URL in your prompt context.', url: 'https://www.wikipedia.org/', docs: 'https://www.mediawiki.org/wiki/API:Main_page', access: 'Public reading', status: 'External setup' },
-  { name: 'ArXiv', kind: 'Tools', category: 'Search & research', summary: 'Find research papers, authors and abstracts for a reading assistant.', needs: 'Public API access with rate limits; papers may have separate licenses.', next: 'Search a topic and review abstracts before using them as evidence.', url: 'https://arxiv.org/', docs: 'https://info.arxiv.org/help/api/index.html', access: 'Public reading', status: 'External setup' },
-  { name: 'Firecrawl', kind: 'Tools', category: 'Documents & web', summary: 'Turn web pages into readable text for document question-answering.', needs: 'API key or a self-hosted installation; site permissions matter.', next: 'Review crawl limits and restrict which sites the tool can read.', url: 'https://www.firecrawl.dev/', docs: 'https://docs.firecrawl.dev/', access: 'Account/key', status: 'External setup' },
-  { name: 'Unstructured', kind: 'Tools', category: 'Documents & web', summary: 'Extract text and sections from PDFs and other document formats.', needs: 'Service key or local setup; protect private documents.', next: 'Check supported formats and choose where your files are processed.', url: 'https://unstructured.io/', docs: 'https://docs.unstructured.io/', access: 'Account/key', status: 'External setup' },
-  { name: 'Wolfram Alpha', kind: 'Tools', category: 'Data & calculation', summary: 'Check calculations and factual queries with a computation service.', needs: 'Wolfram app ID and an eligible plan.', next: 'Review query limits and returned result types.', url: 'https://www.wolframalpha.com/', docs: 'https://products.wolframalpha.com/api/', access: 'Account/key', status: 'External setup' },
-  { name: 'Official MCP Registry', kind: 'MCPs', category: 'Collections', summary: 'Find published MCP servers with publisher and connection metadata.', needs: 'An MCP-capable host; each server has separate permissions.', next: 'Search the registry, verify the publisher and review authentication before installing.', url: 'https://registry.modelcontextprotocol.io/', docs: 'https://modelcontextprotocol.io/registry/about', access: 'Public reading', status: 'External setup' },
-  { name: 'MCP reference servers', kind: 'MCPs', category: 'Collections', summary: 'Reference implementations for files, memory and sequential thinking.', needs: 'Local host setup; reference servers are learning examples, not production guarantees.', next: 'Review each server README and restrict access before running it.', url: 'https://github.com/modelcontextprotocol/servers', docs: 'https://modelcontextprotocol.io/', access: 'Local setup', status: 'External setup' },
-  { name: 'GitHub MCP', kind: 'MCPs', category: 'Developer & automation', summary: 'Read repository context and work with issues through GitHub tools.', needs: 'GitHub account, permissions and a compatible host.', next: 'Select read-only permissions first and approve writes separately.', url: 'https://github.com/github/github-mcp-server', docs: 'https://github.com/github/github-mcp-server#readme', access: 'Account/key', status: 'External setup' },
-  { name: 'Playwright MCP', kind: 'MCPs', category: 'Developer & automation', summary: 'Give an assistant controlled browser actions for testing and page inspection.', needs: 'Local browser/server setup; browser actions can expose sensitive data.', next: 'Use a separate test browser profile and approve navigation scope.', url: 'https://github.com/microsoft/playwright-mcp', docs: 'https://github.com/microsoft/playwright-mcp#readme', access: 'Local setup', status: 'External setup' },
-  { name: 'Filesystem MCP', kind: 'MCPs', category: 'Documents & web', summary: 'Read and organize files within explicitly allowed folders.', needs: 'Local setup and a narrow folder allowlist.', next: 'Allow only a test folder; never expose your whole computer.', url: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem', docs: 'https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem#readme', access: 'Local setup', status: 'External setup' },
-  { name: 'Smithery', kind: 'MCPs', category: 'Collections', summary: 'Discover community MCP servers and their setup instructions.', needs: 'Verify third-party publishers; hosted options may require accounts.', next: 'Check source code, permissions, pricing and maintainer activity.', url: 'https://smithery.ai/', docs: 'https://smithery.ai/docs', access: 'Public reading', status: 'External setup' },
-  { name: 'Composio', kind: 'Plugins', category: 'Developer & automation', summary: 'Browse connected-app actions for email, calendars, CRM and other services.', needs: 'Account, service consent and usage plan; actions can change real data.', next: 'Choose a service and review its exact scopes before granting access.', url: 'https://composio.dev/toolkits', docs: 'https://docs.composio.dev/', access: 'Account/key', status: 'External setup' },
-  { name: 'Semantic Kernel plugins', kind: 'Plugins', category: 'Collections', summary: 'Learn how reusable functions and prompts become callable assistant capabilities.', needs: 'A compatible application and reviewed plugin code.', next: 'Review examples and distinguish prompt-only plugins from executable code.', url: 'https://github.com/microsoft/semantic-kernel', docs: 'https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/', access: 'Local setup', status: 'External setup' },
-  { name: 'LlamaHub', kind: 'Plugins', category: 'Documents & web', summary: 'Find LlamaIndex readers, tools and packages for document workflows.', needs: 'Compatible local application; integrations have separate requirements.', next: 'Filter by reader or tool and review package docs and credentials.', url: 'https://llamahub.ai/', docs: 'https://docs.llamaindex.ai/', access: 'Public reading', status: 'External setup' },
-  { name: 'LangGraph templates', kind: 'Plugins', category: 'Collections', summary: 'Explore reusable graph patterns for research and assistant workflows.', needs: 'Developer setup and model credentials for executable templates.', next: 'Read the workflow and adapt its instructions as a learning recipe.', url: 'https://github.com/langchain-ai/langgraph', docs: 'https://docs.langchain.com/oss/python/langgraph/overview', access: 'Local setup', status: 'External setup' },
-  { name: 'Agent Skills specification', kind: 'Skills', category: 'Collections', summary: 'Understand portable instruction folders that teach an assistant a repeatable task.', needs: 'A compatible skill host; review all instructions and bundled scripts.', next: 'Start with a text-only skill and inspect its permissions and files.', url: 'https://agentskills.io/', docs: 'https://agentskills.io/specification', access: 'Public reading', status: 'Prompt adaptation' },
-  { name: 'Anthropic skills', kind: 'Skills', category: 'Writing & learning', summary: 'Browse examples for documents, design and repeatable assistant tasks.', needs: 'Some skills bundle executable scripts; licenses vary per skill.', next: 'Read SKILL.md, review its license and copy only the instructions you want to learn from.', url: 'https://github.com/anthropics/skills', docs: 'https://github.com/anthropics/skills#readme', access: 'Public reading', status: 'Prompt adaptation' },
-  { name: 'Vercel agent skills', kind: 'Skills', category: 'Developer & automation', summary: 'Reusable web-development and design-review instructions for coding assistants.', needs: 'A compatible host; coding-oriented skills are not run by Langplay.', next: 'Read a skill’s instructions and adapt a review checklist as a prompt.', url: 'https://github.com/vercel-labs/agent-skills', docs: 'https://github.com/vercel-labs/agent-skills#readme', access: 'Public reading', status: 'Prompt adaptation' },
-  { name: 'Skills directory', kind: 'Skills', category: 'Collections', summary: 'Discover community skill packages by task and publisher.', needs: 'Publisher verification and a compatible host; inspect scripts before installation.', next: 'Search by task, review the source and license, and avoid installing unknown code.', url: 'https://skills.sh/', docs: 'https://skills.sh/docs', access: 'Public reading', status: 'Prompt adaptation' },
+  {
+    name: "LangChain tool integrations",
+    kind: "Tools",
+    category: "Collections",
+    summary: "Browse search, files, calculators and hundreds of service tools by what they do.",
+    needs: "Each tool has its own account and setup requirements.",
+    next: "Choose a tool in the directory and review its input, permissions and pricing.",
+    url: "https://docs.langchain.com/oss/python/integrations/tools",
+    docs: "https://docs.langchain.com/oss/python/integrations/tools",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "Tavily",
+    kind: "Tools",
+    category: "Search & research",
+    summary: "Find web sources and return readable evidence for fact-checking recipes.",
+    needs: "Tavily account and API key; usage limits apply.",
+    next: "Review search options and create a key before connecting live search.",
+    url: "https://tavily.com/",
+    docs: "https://docs.tavily.com/",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Brave Search",
+    kind: "Tools",
+    category: "Search & research",
+    summary: "Search the web and get source links without relying on made-up results.",
+    needs: "Brave Search API subscription and key.",
+    next: "Check your plan and the search response fields.",
+    url: "https://brave.com/search/api/",
+    docs: "https://api-dashboard.search.brave.com/app/documentation/web-search",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Wikipedia",
+    kind: "Tools",
+    category: "Search & research",
+    summary: "Look up encyclopedia articles for definitions and background reading.",
+    needs: "Public reading; API rate limits and attribution apply.",
+    next: "Read the article and cite its original URL in your prompt context.",
+    url: "https://www.wikipedia.org/",
+    docs: "https://www.mediawiki.org/wiki/API:Main_page",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "ArXiv",
+    kind: "Tools",
+    category: "Search & research",
+    summary: "Find research papers, authors and abstracts for a reading assistant.",
+    needs: "Public API access with rate limits; papers may have separate licenses.",
+    next: "Search a topic and review abstracts before using them as evidence.",
+    url: "https://arxiv.org/",
+    docs: "https://info.arxiv.org/help/api/index.html",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "Firecrawl",
+    kind: "Tools",
+    category: "Documents & web",
+    summary: "Turn web pages into readable text for document question-answering.",
+    needs: "API key or a self-hosted installation; site permissions matter.",
+    next: "Review crawl limits and restrict which sites the tool can read.",
+    url: "https://www.firecrawl.dev/",
+    docs: "https://docs.firecrawl.dev/",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Unstructured",
+    kind: "Tools",
+    category: "Documents & web",
+    summary: "Extract text and sections from PDFs and other document formats.",
+    needs: "Service key or local setup; protect private documents.",
+    next: "Check supported formats and choose where your files are processed.",
+    url: "https://unstructured.io/",
+    docs: "https://docs.unstructured.io/",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Wolfram Alpha",
+    kind: "Tools",
+    category: "Data & calculation",
+    summary: "Check calculations and factual queries with a computation service.",
+    needs: "Wolfram app ID and an eligible plan.",
+    next: "Review query limits and returned result types.",
+    url: "https://www.wolframalpha.com/",
+    docs: "https://products.wolframalpha.com/api/",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Official MCP Registry",
+    kind: "MCPs",
+    category: "Collections",
+    summary: "Find published MCP servers with publisher and connection metadata.",
+    needs: "An MCP-capable host; each server has separate permissions.",
+    next: "Search the registry, verify the publisher and review authentication before installing.",
+    url: "https://registry.modelcontextprotocol.io/",
+    docs: "https://modelcontextprotocol.io/registry/about",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "MCP reference servers",
+    kind: "MCPs",
+    category: "Collections",
+    summary: "Reference implementations for files, memory and sequential thinking.",
+    needs: "Local host setup; reference servers are learning examples, not production guarantees.",
+    next: "Review each server README and restrict access before running it.",
+    url: "https://github.com/modelcontextprotocol/servers",
+    docs: "https://modelcontextprotocol.io/",
+    access: "Local setup",
+    status: "External setup",
+  },
+  {
+    name: "GitHub MCP",
+    kind: "MCPs",
+    category: "Developer & automation",
+    summary: "Read repository context and work with issues through GitHub tools.",
+    needs: "GitHub account, permissions and a compatible host.",
+    next: "Select read-only permissions first and approve writes separately.",
+    url: "https://github.com/github/github-mcp-server",
+    docs: "https://github.com/github/github-mcp-server#readme",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Playwright MCP",
+    kind: "MCPs",
+    category: "Developer & automation",
+    summary: "Give an assistant controlled browser actions for testing and page inspection.",
+    needs: "Local browser/server setup; browser actions can expose sensitive data.",
+    next: "Use a separate test browser profile and approve navigation scope.",
+    url: "https://github.com/microsoft/playwright-mcp",
+    docs: "https://github.com/microsoft/playwright-mcp#readme",
+    access: "Local setup",
+    status: "External setup",
+  },
+  {
+    name: "Filesystem MCP",
+    kind: "MCPs",
+    category: "Documents & web",
+    summary: "Read and organize files within explicitly allowed folders.",
+    needs: "Local setup and a narrow folder allowlist.",
+    next: "Allow only a test folder; never expose your whole computer.",
+    url: "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+    docs: "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem#readme",
+    access: "Local setup",
+    status: "External setup",
+  },
+  {
+    name: "Smithery",
+    kind: "MCPs",
+    category: "Collections",
+    summary: "Discover community MCP servers and their setup instructions.",
+    needs: "Verify third-party publishers; hosted options may require accounts.",
+    next: "Check source code, permissions, pricing and maintainer activity.",
+    url: "https://smithery.ai/",
+    docs: "https://smithery.ai/docs",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "Composio",
+    kind: "Plugins",
+    category: "Developer & automation",
+    summary: "Browse connected-app actions for email, calendars, CRM and other services.",
+    needs: "Account, service consent and usage plan; actions can change real data.",
+    next: "Choose a service and review its exact scopes before granting access.",
+    url: "https://composio.dev/toolkits",
+    docs: "https://docs.composio.dev/",
+    access: "Account/key",
+    status: "External setup",
+  },
+  {
+    name: "Semantic Kernel plugins",
+    kind: "Plugins",
+    category: "Collections",
+    summary: "Learn how reusable functions and prompts become callable assistant capabilities.",
+    needs: "A compatible application and reviewed plugin code.",
+    next: "Review examples and distinguish prompt-only plugins from executable code.",
+    url: "https://github.com/microsoft/semantic-kernel",
+    docs: "https://learn.microsoft.com/en-us/semantic-kernel/concepts/plugins/",
+    access: "Local setup",
+    status: "External setup",
+  },
+  {
+    name: "LlamaHub",
+    kind: "Plugins",
+    category: "Documents & web",
+    summary: "Find LlamaIndex readers, tools and packages for document workflows.",
+    needs: "Compatible local application; integrations have separate requirements.",
+    next: "Filter by reader or tool and review package docs and credentials.",
+    url: "https://llamahub.ai/",
+    docs: "https://docs.llamaindex.ai/",
+    access: "Public reading",
+    status: "External setup",
+  },
+  {
+    name: "LangGraph templates",
+    kind: "Plugins",
+    category: "Collections",
+    summary: "Explore reusable graph patterns for research and assistant workflows.",
+    needs: "Developer setup and model credentials for executable templates.",
+    next: "Read the workflow and adapt its instructions as a learning recipe.",
+    url: "https://github.com/langchain-ai/langgraph",
+    docs: "https://docs.langchain.com/oss/python/langgraph/overview",
+    access: "Local setup",
+    status: "External setup",
+  },
+  {
+    name: "Agent Skills specification",
+    kind: "Skills",
+    category: "Collections",
+    summary: "Understand portable instruction folders that teach an assistant a repeatable task.",
+    needs: "A compatible skill host; review all instructions and bundled scripts.",
+    next: "Start with a text-only skill and inspect its permissions and files.",
+    url: "https://agentskills.io/",
+    docs: "https://agentskills.io/specification",
+    access: "Public reading",
+    status: "Prompt adaptation",
+  },
+  {
+    name: "Anthropic skills",
+    kind: "Skills",
+    category: "Writing & learning",
+    summary: "Browse examples for documents, design and repeatable assistant tasks.",
+    needs: "Some skills bundle executable scripts; licenses vary per skill.",
+    next: "Read SKILL.md, review its license and copy only the instructions you want to learn from.",
+    url: "https://github.com/anthropics/skills",
+    docs: "https://github.com/anthropics/skills#readme",
+    access: "Public reading",
+    status: "Prompt adaptation",
+  },
+  {
+    name: "Vercel agent skills",
+    kind: "Skills",
+    category: "Developer & automation",
+    summary: "Reusable web-development and design-review instructions for coding assistants.",
+    needs: "A compatible host; coding-oriented skills are not run by Langplay.",
+    next: "Read a skill’s instructions and adapt a review checklist as a prompt.",
+    url: "https://github.com/vercel-labs/agent-skills",
+    docs: "https://github.com/vercel-labs/agent-skills#readme",
+    access: "Public reading",
+    status: "Prompt adaptation",
+  },
+  {
+    name: "Skills directory",
+    kind: "Skills",
+    category: "Collections",
+    summary: "Discover community skill packages by task and publisher.",
+    needs: "Publisher verification and a compatible host; inspect scripts before installation.",
+    next: "Search by task, review the source and license, and avoid installing unknown code.",
+    url: "https://skills.sh/",
+    docs: "https://skills.sh/docs",
+    access: "Public reading",
+    status: "Prompt adaptation",
+  },
 ];
 
-const recipeSchema = z.object({ title: z.string().trim().min(1).max(200).default('Imported recipe'), summary: z.string().max(2000).default('Imported text recipe'), steps: z.array(z.object({ kind: z.string().refine(k => Object.hasOwn(KINDS, k), 'Unknown step type'), instruction: z.string().max(20000), label: z.string().max(150).optional() })).min(1).max(40) });
+/** Parses recipe JSON (v1 `steps` or v2 `nodes`) into a clean, validated recipe. Nothing executes. */
 export function parseRecipe(text: string): Recipe {
-  if (text.length > 500000) throw new Error('This recipe is too large. Use a file under 500 KB.');
-  const result = recipeSchema.safeParse(JSON.parse(text));
-  if (!result.success) throw new Error('Use 1–40 steps, each with a known kind and plain-text instruction.');
-  return { id: 'import', title: result.data.title, summary: result.data.summary, difficulty: 'Easy', categories: [], tools: [], cost: 'Cheap', steps: result.data.steps.map(s => ({ kind: s.kind as keyof typeof KINDS, instruction: s.instruction, ...(s.label ? { label: s.label } : {}) })) };
+  if (text.length > 500000) throw new Error("This recipe is too large. Use a file under 500 KB.");
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("This is not valid recipe JSON.");
+  }
+  return normalizeRecipe(data);
 }
-export function humanize(path: string): string { return (path.split('/').pop() ?? path).replace(/\.(ipynb|md|py)$/i, '').replace(/[_-]/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase()); }
-export function describeExample(path: string): { category: string; summary: string; needs: string } {
+export function humanize(path: string): string {
+  return (path.split("/").pop() ?? path)
+    .replace(/\.(ipynb|md|py)$/i, "")
+    .replace(/[_-]/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+export function describeExample(path: string): {
+  category: string;
+  summary: string;
+  needs: string;
+} {
   const p = path.toLowerCase();
-  if (/rag|retriev|pdf|document/.test(p)) return { category: 'Document Q&A', summary: 'Learn how to gather relevant document passages before asking AI for an answer.', needs: 'The original may need documents, an embedding model and a search store; only reviewed prompt text is imported here.' };
-  if (/agent|multi|graph/.test(p)) return { category: 'Multi-Agent', summary: 'Explore a workflow that delegates work or passes a draft between AI roles.', needs: 'The original may need tools or graph execution; Langplay adapts reviewed text, not the program.' };
-  if (/tool|search|browser/.test(p)) return { category: 'Tool User', summary: 'Learn how an assistant chooses a tool and uses its result in an answer.', needs: 'Live tools need separate connections; Langplay’s tool steps currently use sample results.' };
-  if (/eval|test|trace/.test(p)) return { category: 'Evaluation', summary: 'Explore a way to review answers and compare how a workflow performs.', needs: 'The original may need datasets or a tracing account; inspect the source before adapting a prompt.' };
-  return { category: 'Beginner Friendly', summary: 'Read this example’s instructions and adapt a plain-text prompt for your own question.', needs: 'Requirements vary; the preview shows source text and any readable prompts before import.' };
+  if (/rag|retriev|pdf|document/.test(p))
+    return {
+      category: "Document Q&A",
+      summary: "Learn how to gather relevant document passages before asking AI for an answer.",
+      needs:
+        "The original may need documents, an embedding model and a search store; only reviewed prompt text is imported here.",
+    };
+  if (/agent|multi|graph/.test(p))
+    return {
+      category: "Multi-Agent",
+      summary: "Explore a workflow that delegates work or passes a draft between AI roles.",
+      needs:
+        "The original may need tools or graph execution; Langplay adapts reviewed text, not the program.",
+    };
+  if (/tool|search|browser/.test(p))
+    return {
+      category: "Tool User",
+      summary: "Learn how an assistant chooses a tool and uses its result in an answer.",
+      needs:
+        "Live tools need separate connections; Langplay’s tool steps currently use sample results.",
+    };
+  if (/eval|test|trace/.test(p))
+    return {
+      category: "Evaluation",
+      summary: "Explore a way to review answers and compare how a workflow performs.",
+      needs:
+        "The original may need datasets or a tracing account; inspect the source before adapting a prompt.",
+    };
+  return {
+    category: "Beginner Friendly",
+    summary:
+      "Read this example’s instructions and adapt a plain-text prompt for your own question.",
+    needs:
+      "Requirements vary; the preview shows source text and any readable prompts before import.",
+  };
 }

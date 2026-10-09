@@ -33,7 +33,7 @@
 }
 
 .squish-switch::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: -8px;
 }
@@ -42,7 +42,7 @@
   cursor: grabbing;
 }
 
-.squish-switch[aria-disabled='true'] {
+.squish-switch[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.5;
 }

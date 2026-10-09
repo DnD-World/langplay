@@ -36,3 +36,9 @@ dist-ssr
 tsconfig.tsbuildinfo
 dist
 .output
+
+# Local agent tooling
+.claude/
+
+# Local manual-test exports
+public/_test/
