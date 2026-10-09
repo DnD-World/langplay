@@ -7,11 +7,13 @@ export function Overlay({
   onClose,
   children,
   wide,
+  title,
 }: {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
   wide?: boolean;
+  title?: string;
 }) {
   return (
     <Dialog.Root
@@ -27,7 +29,7 @@ export function Overlay({
           className={`fixed right-0 top-0 z-50 h-dvh w-full ${wide ? "max-w-3xl" : "max-w-md"} overflow-y-auto border-l bg-card p-5 pt-12 shadow-2xl sm:p-6 sm:pt-12`}
         >
           <Dialog.Title className="sr-only">
-            {wide ? "Recipe and extension library" : "Langplay settings"}
+            {title ?? (wide ? "Recipe and extension library" : "Langplay settings")}
           </Dialog.Title>
           <Dialog.Close asChild>
             <Button

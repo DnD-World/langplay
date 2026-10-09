@@ -30,6 +30,8 @@ type Props = {
   onTitle: (title: string) => void;
   onMilestone: (id: string) => void;
   graphView?: ReactNode;
+  onOpenDocs: () => void;
+  docCount: number;
 };
 
 const selectCls = `${inputCls} py-1.5 text-xs`;
@@ -83,10 +85,14 @@ function StepEditor({
   recipe,
   node,
   updateNode,
+  onOpenDocs,
+  docCount,
 }: {
   recipe: Recipe;
   node: RecipeNode;
   updateNode: Props["updateNode"];
+  onOpenDocs: () => void;
+  docCount: number;
 }) {
   const following = recipe.nodes[recipe.nodes.findIndex((n) => n.id === node.id) + 1];
   const autoLabel = `Next in list${following ? ` (${following.label})` : " (end)"}`;
@@ -129,6 +135,16 @@ function StepEditor({
               </option>
             ))}
           </select>
+        </div>
+      )}
+
+      {node.kind === "retriever" && (
+        <div className="flex items-center gap-2 text-xs">
+          <Button variant="outline" size="sm" onClick={onOpenDocs}>
+            <AnimatedIcon name="retriever" />{" "}
+            {docCount ? `Your documents (${docCount})` : "Add a document"}
+          </Button>
+          <Info tip="This step searches the files you add and passes the best passages, with page numbers, to the next steps." />
         </div>
       )}
 
@@ -426,7 +442,13 @@ export function BuilderPanel(props: Props) {
                   </div>
                   <Flow recipe={recipe} node={s} />
                   {activeId === s.id && (
-                    <StepEditor recipe={recipe} node={s} updateNode={updateNode} />
+                    <StepEditor
+                      recipe={recipe}
+                      node={s}
+                      updateNode={updateNode}
+                      onOpenDocs={props.onOpenDocs}
+                      docCount={props.docCount}
+                    />
                   )}
                 </div>
               </StarFrame>

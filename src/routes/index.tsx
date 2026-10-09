@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LlmSettings, Recipe } from "@/engine";
 import { MILESTONE_COUNT, QUESTS } from "@/lib/lp-data";
 import { cloneRecipe, defaultRecipe } from "@/lib/lp-recipes";
@@ -12,6 +12,8 @@ import { TopBar } from "@/components/lp/play/TopBar";
 import { BuilderPanel } from "@/components/lp/play/BuilderPanel";
 import { RunPanel } from "@/components/lp/play/RunPanel";
 import { LearnPanel } from "@/components/lp/play/LearnPanel";
+import { DocumentsDrawer } from "@/components/lp/play/DocumentsDrawer";
+import { docSearch, loadDocs, type StoredDoc } from "@/lib/lp-docs";
 import {
   DEFAULT_SETTINGS,
   STORAGE,
@@ -64,6 +66,9 @@ function Playground() {
   const [showSettings, setShowSettings] = useState(false);
   const [showHub, setShowHub] = useState(false);
   const [showCode, setShowCode] = useState(false);
+  const [showDocs, setShowDocs] = useState(false);
+  const [docs, setDocs] = useState<StoredDoc[]>([]);
+  const searchDocs = useMemo(() => docSearch(docs), [docs]);
   const [motion, setMotion] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
@@ -77,6 +82,7 @@ function Playground() {
   const { game, complete, toggleRetro } = useGame(showToast);
 
   useEffect(() => {
+    void loadDocs().then(setDocs);
     setSettings(loadSettings());
     try {
       setMotion(localStorage.getItem(STORAGE.motion) !== "off");
@@ -161,10 +167,15 @@ function Playground() {
             moveNode={moveNode}
             onTitle={(title) => setRecipe((r) => ({ ...r, title }))}
             onMilestone={complete}
+            onOpenDocs={() => setShowDocs(true)}
+            docCount={docs.length}
           />
           <RunPanel
             recipe={recipe}
             settings={settings}
+            searchDocs={searchDocs}
+            docCount={docs.length}
+            onOpenDocs={() => setShowDocs(true)}
             onStep={(id) => {
               setRunningId(id);
               if (id) setActiveId(id);
@@ -201,6 +212,12 @@ function Playground() {
           settings={settings}
           setSettings={setSettings}
           onTested={() => complete("connect")}
+        />
+        <DocumentsDrawer
+          open={showDocs}
+          onClose={() => setShowDocs(false)}
+          docs={docs}
+          setDocs={setDocs}
         />
         <RecipeHub open={showHub} onClose={() => setShowHub(false)} onInstall={install} />
       </div>

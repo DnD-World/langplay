@@ -35,6 +35,8 @@ export function RunPanel({
   onStep,
   onMilestone,
   firstRunDone,
+  docCount,
+  onOpenDocs,
 }: {
   recipe: Recipe;
   settings: LlmSettings;
@@ -42,6 +44,8 @@ export function RunPanel({
   onStep: (nodeId: string | null) => void;
   onMilestone: (id: RunMilestone) => void;
   firstRunDone: boolean;
+  docCount: number;
+  onOpenDocs: () => void;
 }) {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -113,10 +117,15 @@ export function RunPanel({
           <AnimatedIcon name="chat" /> Live Run
           <Info tip="Type a question and watch your recipe work on it step by step." />
         </h2>
-        <span className="text-xs text-muted-foreground">
-          {providerName}
-          {settings.provider !== "simulator" && settings.model ? ` · ${settings.model}` : ""}
-        </span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="text-xs text-muted-foreground">
+            {providerName}
+            {settings.provider !== "simulator" && settings.model ? ` · ${settings.model}` : ""}
+          </span>
+          <Button variant="outline" size="sm" onClick={onOpenDocs} className="h-7 text-xs">
+            <AnimatedIcon name="retriever" /> Documents{docCount ? ` (${docCount})` : ""}
+          </Button>
+        </div>
       </div>
       {(running || last) && (
         <div className="border-b px-4 py-3">

@@ -27,7 +27,7 @@ function summary(t: StepTrace, node?: RecipeNode): string {
     case "retriever":
       return t.practice
         ? "Practised document lookup with sample page notes."
-        : `Found ${t.sources?.length ?? 0} matching passages in your documents.`;
+        : `Found ${t.sources?.length ?? 0} matching passage${t.sources?.length === 1 ? "" : "s"} in your documents.`;
   }
 }
 
