@@ -1,11 +1,6 @@
-export type StepKind = "input" | "agent" | "tool" | "retriever" | "router" | "critic" | "final";
+import type { NodeKind } from "@/engine";
 
-export interface Step {
-  id: string;
-  kind: StepKind;
-  label: string;
-  instruction: string;
-}
+export type StepKind = NodeKind;
 
 export const KINDS: Record<
   StepKind,
@@ -46,7 +41,8 @@ graph.add_node("agent", agent)`,
   tool: {
     emoji: "🔎",
     title: "Tool / Search",
-    plain: "A gadget the AI can use, like looking something up on the web.",
+    plain:
+      "A real gadget the AI can use: Wikipedia, a quick web answer, a calculator or a clock. The AI writes what to look up.",
     techName: "@tool + ToolNode",
     analogy: "Like letting the chef phone a friend for a missing ingredient.",
     code: `from langchain_core.tools import tool
@@ -74,12 +70,15 @@ retriever = store.as_retriever(search_kwargs={"k": 3})`,
   router: {
     emoji: "🔀",
     title: "Smart Router",
-    plain: "A traffic cop that sends the question down the right path.",
+    plain: "A traffic cop: the AI reads the question and picks which path the recipe follows next.",
     techName: "add_conditional_edges",
     analogy: "Like a receptionist pointing you to the right desk.",
     code: `def route(state):
-    text = state["messages"][-1].content.lower()
-    return "billing" if "refund" in text else "tech"
+    choice = llm.invoke([
+        ("system", "Choose exactly one option: billing, tech."),
+        ("human", state["question"]),
+    ]).content.strip().lower()
+    return "billing" if "billing" in choice else "tech"
 
 graph.add_conditional_edges("router", route,
     {"billing": "billing_agent", "tech": "tech_agent"})`,
@@ -87,18 +86,24 @@ graph.add_conditional_edges("router", route,
   critic: {
     emoji: "🧐",
     title: "Critic / Checker",
-    plain: "A second AI that reviews the first one's work and suggests fixes.",
-    techName: "Reflection Node (multi-agent)",
-    analogy: "Like an editor marking up a draft with a red pen.",
+    plain:
+      "A second AI that reviews the draft. It can rewrite it, or send it back to the writer until it's good — a loop.",
+    techName: "Reflection loop (conditional edge back to the writer)",
+    analogy: "Like an editor handing a draft back with red-pen notes until it's ready.",
     code: `def critic(state):
     review = llm.invoke([
-        ("system", "Critique this answer and improve it."),
-        *state["messages"],
-    ])
-    return {"messages": [review]}
+        ("system", "Reply PASS if the draft is good, else REVISE: what to fix."),
+        ("human", state["draft"]),
+    ]).content
+    return {"feedback": review, "loops": state["loops"] + 1}
 
-graph.add_node("critic", critic)
-graph.add_edge("writer", "critic")`,
+def check(state):
+    if review_passed(state) or state["loops"] >= 2:
+        return "good"
+    return "needs_work"
+
+graph.add_conditional_edges("critic", check,
+    {"good": "final", "needs_work": "writer"})  # a cycle!`,
   },
   final: {
     emoji: "🏁",
@@ -115,134 +120,7 @@ print(app.invoke({"messages": [("human", "Hi!")]}))`,
   },
 };
 
-let n = 0;
-export const uid = () => `s${Date.now().toString(36)}${(n++).toString(36)}`;
-export const mk = (kind: StepKind, instruction = "", label?: string): Step => ({
-  id: uid(),
-  kind,
-  label: label ?? KINDS[kind].title,
-  instruction,
-});
-
-export const defaultSteps = (): Step[] => [
-  mk("input", "Answer like I'm 10 years old: {question}"),
-  mk("agent", "Think step by step and draft a friendly answer."),
-  mk("tool", "Search the web for supporting facts."),
-  mk("final", "Give a short, clear final answer."),
-];
-
 export type Category = "Beginner Friendly" | "Multi-Agent" | "Document Q&A" | "Tool User";
-
-export interface Recipe {
-  id: string;
-  title: string;
-  summary: string;
-  difficulty: "Easy" | "Medium" | "Hard";
-  categories: Category[];
-  tools: string[];
-  cost: "Cheap" | "Medium";
-  source?: string;
-  steps: { kind: StepKind; instruction: string; label?: string }[];
-}
-
-export const RECIPES: Recipe[] = [
-  {
-    id: "fact",
-    title: "Web Fact Checker",
-    summary: "Checks if a claim is true by searching the web and explaining the verdict.",
-    difficulty: "Easy",
-    categories: ["Beginner Friendly", "Tool User"],
-    tools: ["Web Search"],
-    cost: "Cheap",
-    steps: [
-      { kind: "input", instruction: "Is this claim true? {question}" },
-      { kind: "agent", instruction: "Decide what to search to verify the claim." },
-      { kind: "tool", instruction: "Search the web for evidence." },
-      { kind: "final", instruction: "Say TRUE, FALSE or UNSURE and explain why simply." },
-    ],
-  },
-  {
-    id: "pdf",
-    title: "PDF ELI5 Explainer",
-    summary: "Finds the right pages in a document and explains them like you're five.",
-    difficulty: "Medium",
-    categories: ["Document Q&A", "Beginner Friendly"],
-    tools: ["Document Lookup"],
-    cost: "Cheap",
-    steps: [
-      { kind: "input", instruction: "Explain from my document: {question}" },
-      { kind: "retriever", instruction: "Fetch the 3 most relevant pages." },
-      { kind: "agent", instruction: "Explain the pages like I'm five." },
-      { kind: "final", instruction: "Summarize in 3 bullet points." },
-    ],
-  },
-  {
-    id: "duo",
-    title: "Writer & Critic Duo",
-    summary: "One AI writes, another critiques, and together they polish the result.",
-    difficulty: "Medium",
-    categories: ["Multi-Agent"],
-    tools: ["None"],
-    cost: "Medium",
-    steps: [
-      { kind: "input", instruction: "Write about: {question}" },
-      { kind: "agent", instruction: "Write a short first draft.", label: "Writer" },
-      { kind: "critic", instruction: "Point out weaknesses and rewrite it better." },
-      { kind: "final", instruction: "Return the polished version." },
-    ],
-  },
-  {
-    id: "router",
-    title: "Smart Support Router",
-    summary: "Sorts customer questions into billing or tech help and answers accordingly.",
-    difficulty: "Medium",
-    categories: ["Multi-Agent", "Tool User"],
-    tools: ["Router"],
-    cost: "Cheap",
-    steps: [
-      { kind: "input", instruction: "Customer says: {question}" },
-      { kind: "router", instruction: "Is this about billing or tech?" },
-      {
-        kind: "agent",
-        instruction: "Answer as the matching support specialist.",
-        label: "Specialist",
-      },
-      { kind: "final", instruction: "Reply politely in under 80 words." },
-    ],
-  },
-  {
-    id: "code",
-    title: "Code Fixer & Explainer",
-    summary: "Fixes a broken bit of code, tests it, and explains the fix in plain words.",
-    difficulty: "Hard",
-    categories: ["Tool User"],
-    tools: ["Code Runner"],
-    cost: "Medium",
-    steps: [
-      { kind: "input", instruction: "Fix this code: {question}" },
-      { kind: "agent", instruction: "Find the bug and propose a fix.", label: "Fixer" },
-      { kind: "tool", instruction: "Run a quick test on the fixed code.", label: "Test Runner" },
-      { kind: "critic", instruction: "Double-check the test result." },
-      { kind: "final", instruction: "Show the fix and explain it for a beginner." },
-    ],
-  },
-  {
-    id: "brief",
-    title: "Daily Briefing Bot",
-    summary: "Gathers today's news on a topic and turns it into a 1-minute briefing.",
-    difficulty: "Easy",
-    categories: ["Beginner Friendly", "Tool User"],
-    tools: ["Web Search"],
-    cost: "Cheap",
-    steps: [
-      { kind: "input", instruction: "Topic for today's briefing: {question}" },
-      { kind: "tool", instruction: "Search for today's headlines." },
-      { kind: "agent", instruction: "Summarize each headline in one line.", label: "Summarizer" },
-      { kind: "agent", instruction: "Merge into a friendly morning briefing.", label: "Editor" },
-      { kind: "final", instruction: "Deliver the briefing in 5 bullets." },
-    ],
-  },
-];
 
 export const CATEGORIES: Category[] = [
   "Beginner Friendly",
@@ -264,6 +142,7 @@ export type ProviderId =
   | "groq"
   | "kilo"
   | "custom"
+  | "gemini"
   | "cerebras"
   | "nvidia"
   | "mistral"
@@ -295,7 +174,7 @@ export const PROVIDERS: {
   {
     id: "pollinations",
     name: "Pollinations AI",
-    group: "Free · no key",
+    group: "Free · no key (a few requests)",
     baseUrl: "https://text.pollinations.ai/openai",
     model: "openai",
     models: ["openai"],
@@ -315,7 +194,7 @@ export const PROVIDERS: {
   {
     id: "horde",
     name: "AI Horde",
-    group: "Free · no key",
+    group: "Free · no key (a few requests)",
     baseUrl: "https://oai.aihorde.net/v1",
     model: "auto",
     models: ["auto"],
@@ -325,12 +204,18 @@ export const PROVIDERS: {
   {
     id: "ovh",
     name: "OVHcloud AI Endpoints",
-    group: "Free · no key",
+    group: "Free · no key (a few requests)",
     baseUrl: "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
-    model: "Mistral-7B-Instruct-v0.3",
-    models: ["Mistral-7B-Instruct-v0.3", "Meta-Llama-3_1-70B-Instruct"],
+    model: "Mistral-Small-3.2-24B-Instruct-2506",
+    models: [
+      "Mistral-Small-3.2-24B-Instruct-2506",
+      "Meta-Llama-3_3-70B-Instruct",
+      "gpt-oss-120b",
+      "Qwen3.5-9B",
+      "Mistral-7B-Instruct-v0.3",
+    ],
     needsKey: false,
-    tip: "A European cloud that offers a free, limited AI tier.",
+    tip: "A European cloud with a free, rate-limited AI tier. Your questions are sent to OVHcloud.",
   },
   {
     id: "ollama",
@@ -365,7 +250,7 @@ export const PROVIDERS: {
   {
     id: "openrouter",
     name: "OpenRouter",
-    group: "Bring your own key",
+    group: "Free with a key",
     baseUrl: "https://openrouter.ai/api/v1",
     model: "openrouter/free",
     models: ["openrouter/free", "openai/gpt-4o-mini"],
@@ -373,9 +258,19 @@ export const PROVIDERS: {
     tip: "One key that unlocks many different AI models; the free router picks a free model.",
   },
   {
+    id: "gemini",
+    name: "Google Gemini",
+    group: "Free with a key",
+    baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai",
+    model: "gemini-3.8-flash",
+    models: ["gemini-3.8-flash"],
+    needsKey: true,
+    tip: "Google's AI. A free key from Google AI Studio has a daily free allowance — the easiest way to get lots of free runs.",
+  },
+  {
     id: "groq",
     name: "Groq",
-    group: "Bring your own key",
+    group: "Free with a key",
     baseUrl: "https://api.groq.com/openai/v1",
     model: "llama-3.1-8b-instant",
     models: ["llama-3.1-8b-instant", "mixtral-8x7b-32768"],
@@ -484,14 +379,22 @@ export const RANKS = [
   { name: "Chain Weaver", min: 100, icon: "🧵" },
   { name: "Tool Tamer", min: 250, icon: "🛠️" },
   { name: "Graph Overlord", min: 500, icon: "👑" },
+  { name: "Agent Architect", min: 900, icon: "🏗️" },
+  { name: "LangGraph Legend", min: 1500, icon: "🌌" },
 ];
 
 export const QUESTS = [
   { id: "first_run", title: "Run your first prompt", pts: 50, coins: 5 },
-  { id: "connect2", title: "Connect 2+ nodes", pts: 25, coins: 3 },
+  { id: "trace", title: "Open a step in the Inspect Box", pts: 25, coins: 3 },
+  { id: "connect2", title: "Change the order of your steps", pts: 25, coins: 3 },
   { id: "python", title: "Peek at Python code", pts: 25, coins: 3 },
-  { id: "tool", title: "Trigger a tool", pts: 40, coins: 4 },
-  { id: "install", title: "Install a community recipe", pts: 40, coins: 4 },
+  { id: "tool", title: "Use a real tool", pts: 40, coins: 4 },
+  { id: "router", title: "Let a router choose a path", pts: 40, coins: 4 },
+  { id: "loop", title: "Watch a critic send a draft back", pts: 50, coins: 5 },
+  { id: "docs", title: "Search your own document", pts: 50, coins: 5 },
+  { id: "install", title: "Install a library recipe", pts: 40, coins: 4 },
   { id: "connect", title: "Test an AI connection", pts: 30, coins: 3 },
   { id: "konami", title: "??? Secret ???", pts: 100, coins: 20 },
 ];
+
+export const MILESTONE_COUNT = QUESTS.filter((q) => q.id !== "konami").length;

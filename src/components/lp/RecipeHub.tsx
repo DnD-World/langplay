@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
-import { CATEGORIES, KINDS, RECIPES, type Category, type Recipe } from "@/lib/lp-data";
+import { CATEGORIES, KINDS, type Category } from "@/lib/lp-data";
+import { RECIPES } from "@/lib/lp-recipes";
+import type { Recipe } from "@/engine";
 import { Overlay } from "./Overlay";
 import { Info, Label, inputCls, btn } from "./Info";
 import { Button } from "@/components/ui/button";
@@ -227,12 +229,12 @@ export function RecipeHub({
                   </div>
                   {inspect === r.id && (
                     <div className="mb-3 flex flex-wrap items-center gap-1 rounded-lg bg-background/60 p-2 text-xs">
-                      {r.steps.map((s, i) => (
+                      {r.nodes.map((s, i) => (
                         <span key={i} className="flex items-center gap-1">
                           <span className="rounded border px-1.5 py-0.5">
                             <AnimatedIcon name={s.kind} /> {s.label ?? KINDS[s.kind].title}
                           </span>
-                          {i < r.steps.length - 1 && <span className="text-primary">→</span>}
+                          {i < r.nodes.length - 1 && <span className="text-primary">→</span>}
                         </span>
                       ))}
                     </div>
@@ -595,7 +597,7 @@ export function RecipeHub({
               <h3 className="font-bold">{reviewedImport.title}</h3>
               <p className="text-sm">{reviewedImport.summary}</p>
               <ol className="space-y-2 text-sm">
-                {reviewedImport.steps.map((s, i) => (
+                {reviewedImport.nodes.map((s, i) => (
                   <li key={i}>
                     <b>
                       {i + 1}. {s.label ?? KINDS[s.kind].title}

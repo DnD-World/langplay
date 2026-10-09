@@ -8,7 +8,9 @@ describe("reviewable library imports", () => {
         steps: [{ kind: "agent", instruction: "Answer {question}", execute: "evil" }],
       }),
     );
-    expect(r.steps).toEqual([{ kind: "agent", instruction: "Answer {question}" }]);
+    expect(r.nodes).toEqual([
+      { id: "n1", kind: "agent", label: "AI Thinking (Agent)", instruction: "Answer {question}" },
+    ]);
   });
   it("rejects unknown and inherited step types, missing instructions and empty recipes", () => {
     for (const steps of [

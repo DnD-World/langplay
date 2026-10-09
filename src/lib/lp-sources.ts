@@ -1,4 +1,4 @@
-import type { Recipe } from "./lp-data";
+import type { Recipe } from "@/engine";
 export const SOURCES = [
   {
     id: "langchain-ai/cookbooks",
@@ -129,27 +129,20 @@ export async function pullHub(handle: string): Promise<{ text: string; source: s
   return { text: templates.join("\n\n"), source: `https://smith.langchain.com/hub/${clean}` };
 }
 export function promptRecipe(title: string, prompt: string, source: string): Recipe {
+  const label =
+    title
+      .split("/")
+      .pop()
+      ?.replace(/\.(ipynb|py|md)$/, "") || title;
   return {
-    id: `source-${title}`,
+    version: 2,
     title,
     source,
     summary:
       "Prompt adapted into a text-only recipe; original tools and document connections are not imported.",
-    difficulty: "Easy",
-    categories: ["Beginner Friendly"],
-    tools: [],
-    cost: "Cheap",
-    steps: [
-      { kind: "input", instruction: "{question}" },
-      {
-        kind: "agent",
-        instruction: prompt,
-        label:
-          title
-            .split("/")
-            .pop()
-            ?.replace(/\.(ipynb|py|md)$/, "") ?? title,
-      },
+    nodes: [
+      { id: "in", kind: "input", label: "Input Prompt", instruction: "{question}" },
+      { id: "prompt", kind: "agent", label: label.slice(0, 150), instruction: prompt },
     ],
   };
 }

@@ -1,12 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 import { PROVIDERS, type ProviderId } from "@/lib/lp-data";
-import { chat, type LlmSettings } from "@/lib/lp-llm";
+import { chat, type LlmSettings } from "@/engine";
 import { Info, Label, inputCls, btn } from "./Info";
 import { Button } from "@/components/ui/button";
 import { AnimatedIcon } from "./AnimatedIcon";
 import { fetchModels, presetModels, MODEL_POLICY, type ModelOption } from "@/lib/lp-models";
 import { Overlay } from "./Overlay";
 import { SquishToggle } from "./EffectControls";
+
+const FREE_KEY_GUIDES: Record<
+  string,
+  { site: string; url: string; signIn: string; create: string }
+> = {
+  gemini: {
+    site: "Google AI Studio",
+    url: "https://aistudio.google.com/apikey",
+    signIn: " with a Google account",
+    create: 'Press "Create API key" and copy it.',
+  },
+  groq: {
+    site: "Groq Console",
+    url: "https://console.groq.com/keys",
+    signIn: " (email or Google)",
+    create: 'Press "Create API Key", give it any name, and copy it.',
+  },
+  openrouter: {
+    site: "OpenRouter",
+    url: "https://openrouter.ai/settings/keys",
+    signIn: "",
+    create: 'Press "Create Key", copy it, and keep the model on openrouter/free.',
+  },
+};
 
 export function SettingsDrawer({
   open,
@@ -230,6 +254,32 @@ export function SettingsDrawer({
           </p>
         )}
       </div>
+      {FREE_KEY_GUIDES[settings.provider] && (
+        <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 p-3 text-xs">
+          <p className="mb-2 font-bold text-primary">
+            <AnimatedIcon name="spark" /> Get a free key in about 2 minutes
+          </p>
+          <ol className="list-decimal space-y-1 pl-4">
+            <li>
+              Open{" "}
+              <a
+                className="text-primary underline"
+                href={FREE_KEY_GUIDES[settings.provider]!.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {FREE_KEY_GUIDES[settings.provider]!.site} ↗
+              </a>{" "}
+              and sign in{FREE_KEY_GUIDES[settings.provider]!.signIn}.
+            </li>
+            <li>{FREE_KEY_GUIDES[settings.provider]!.create}</li>
+            <li>Paste it into API Key below, then press Test Connection.</li>
+          </ol>
+          <p className="mt-2 text-muted-foreground">
+            No card needed for the free allowance. The key stays in this browser only.
+          </p>
+        </div>
+      )}
       {settings.provider !== "simulator" && (
         <div className="space-y-4">
           <div>

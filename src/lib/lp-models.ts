@@ -1,5 +1,5 @@
 import { PROVIDERS } from "./lp-data";
-import type { LlmSettings } from "./lp-llm";
+import type { LlmSettings } from "@/engine";
 export type ModelOption = { id: string; free: boolean; evidence: string };
 const tierProviders = new Set([
   "cerebras",
@@ -9,6 +9,7 @@ const tierProviders = new Set([
   "nvidia",
   "sealion",
   "ollama-cloud",
+  "gemini",
 ]);
 const meganovaFree = new Set([
   "meganova-ai/manta-mini-1.0",
@@ -19,6 +20,18 @@ const meganovaFree = new Set([
   "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
 ]);
 export const MODEL_POLICY: Record<string, { note: string; url: string }> = {
+  gemini: {
+    note: "A free AI Studio key has a daily free allowance per Google project; limits reset at midnight Pacific time. Billing-enabled projects are charged.",
+    url: "https://ai.google.dev/gemini-api/docs/rate-limits",
+  },
+  pollinations: {
+    note: "No key needed, but only a few free requests per visitor before it asks for payment (checked 9 Oct 2026). Langplay then tries OVH, then the Simulator.",
+    url: "https://pollinations.ai/",
+  },
+  ovh: {
+    note: "No key needed; the free tier allows about 2 requests per minute (checked 9 Oct 2026).",
+    url: "https://endpoints.ai.cloud.ovh.net/",
+  },
   openrouter: {
     note: "Free suffix or zero input AND output prices. Free usage still has daily limits.",
     url: "https://openrouter.ai/collections/free-models",
@@ -66,6 +79,8 @@ export function classifyModel(
   allowance: boolean,
   pricing?: { prompt?: string | number; completion?: string | number },
 ): ModelOption {
+  if (["pollinations", "ovh"].includes(provider))
+    return { id, free: true, evidence: "Free tier · very limited" };
   if (["simulator", "ollama", "lmstudio", "horde"].includes(provider))
     return {
       id,

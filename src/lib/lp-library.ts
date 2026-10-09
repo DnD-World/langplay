@@ -1,5 +1,4 @@
-import { z } from "zod";
-import { KINDS, type Recipe } from "./lp-data";
+import { normalizeRecipe, type Recipe } from "@/engine";
 
 export type LibraryKind = "Tools" | "MCPs" | "Plugins" | "Skills";
 export type LibraryEntry = {
@@ -281,39 +280,16 @@ export const LIBRARY: LibraryEntry[] = [
   },
 ];
 
-const recipeSchema = z.object({
-  title: z.string().trim().min(1).max(200).default("Imported recipe"),
-  summary: z.string().max(2000).default("Imported text recipe"),
-  steps: z
-    .array(
-      z.object({
-        kind: z.string().refine((k) => Object.hasOwn(KINDS, k), "Unknown step type"),
-        instruction: z.string().max(20000),
-        label: z.string().max(150).optional(),
-      }),
-    )
-    .min(1)
-    .max(40),
-});
+/** Parses recipe JSON (v1 `steps` or v2 `nodes`) into a clean, validated recipe. Nothing executes. */
 export function parseRecipe(text: string): Recipe {
   if (text.length > 500000) throw new Error("This recipe is too large. Use a file under 500 KB.");
-  const result = recipeSchema.safeParse(JSON.parse(text));
-  if (!result.success)
-    throw new Error("Use 1–40 steps, each with a known kind and plain-text instruction.");
-  return {
-    id: "import",
-    title: result.data.title,
-    summary: result.data.summary,
-    difficulty: "Easy",
-    categories: [],
-    tools: [],
-    cost: "Cheap",
-    steps: result.data.steps.map((s) => ({
-      kind: s.kind as keyof typeof KINDS,
-      instruction: s.instruction,
-      ...(s.label ? { label: s.label } : {}),
-    })),
-  };
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("This is not valid recipe JSON.");
+  }
+  return normalizeRecipe(data);
 }
 export function humanize(path: string): string {
   return (path.split("/").pop() ?? path)
