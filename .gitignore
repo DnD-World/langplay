@@ -42,3 +42,7 @@ dist
 
 # Local manual-test exports
 public/_test/
+
+# Tauri build output
+src-tauri/target/
+src-tauri/gen/

@@ -1,0 +1,58 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Langplay",
+  "version": "0.2.0",
+  "identifier": "com.stravelakis.langplay",
+  "build": {
+    "frontendDist": "../.output/public",
+    "devUrl": "http://localhost:20136",
+    "beforeDevCommand": "bun run dev:local",
+    "beforeBuildCommand": "bun run build:desktop"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "createUpdaterArtifacts": true,
+    "publisher": "Lambros Stravelakis",
+    "copyright": "Copyright (c) 2026 Lambros Stravelakis",
+    "category": "Education",
+    "shortDescription": "Learn LangChain and LangGraph without code",
+    "longDescription": "Build AI workflows from blocks, run them on free or your own AI, see every step, and spin them out as your own tools.",
+    "homepage": "https://langplay.stravelakis.com",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhEQzQ4M0E0NEIwMjEwNjgKUldSb0VBSkxwSVBFalFERm51VnU0TGVYcDl4bkVVMi9tUDlZanlXS2x5RUJUbVRzMEZyS0w0eSsK",
+      "endpoints": [
+        "https://github.com/DnD-World/langplay/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

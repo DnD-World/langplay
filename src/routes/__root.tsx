@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { installDesktopFetch, installExternalLinks } from "../desktop/bridge";
 
 function NotFoundComponent() {
   return (
@@ -78,10 +79,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Lambros Stravelakis" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -118,6 +118,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Windows app only: route AI requests through the app and open links in the browser.
+  useEffect(() => {
+    void installDesktopFetch();
+    installExternalLinks();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
