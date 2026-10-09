@@ -21,3 +21,4 @@
 - React Bits micro-controls use the shared Button and semantic theme tokens; browser-heavy effects load after hydration, with cleanup for timers and drawing loops.
 - Motion effects mount as siblings of page content so changing animation preferences cannot remount the playground or discard unsaved work.
 - Async connection and model-list results are applied only to the settings snapshot that started them, preventing late responses from overwriting a new provider selection.
+- v2 (2026-10-09): one dependency-free engine in `src/engine` runs the app and every spun-out tool; exported files never contain user API keys; model output is rendered as text/safe Markdown only. See CONNECT-AGENTS.md and HANDOFF.md.

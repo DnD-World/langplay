@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "dev:local": "vite dev --port 20136 --strictPort"
   },
   "overrides": {
     "rolldown": "1.2.1"

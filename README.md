@@ -1,42 +1,52 @@
 # Langplay
 
-A visual playground for beginners (no coding needed) to learn and experiment with LangChain and LangGraph concepts.
+[![CI](https://github.com/DnD-World/langplay/actions/workflows/ci.yml/badge.svg)](https://github.com/DnD-World/langplay/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/DnD-World/langplay)](LICENSE)
 
-- Build a recipe of steps (Input → AI Thinking → Tool/Search → Final Answer), run it, and read a plain-English explanation of every step.
-- Connect free or keyed AI providers (OpenAI-compatible), or use the zero-network Offline Simulator.
-- Browse ready recipes, LangChain cookbooks, LangChain Hub prompts and an extensions catalogue.
-- XP, coins, ranks and quests built into the learning flow.
+**Learn LangChain and LangGraph without writing code: build an AI workflow from blocks, run it on a free AI, see every step, then ship it as your own tool.**
 
-Live: https://langplay.lovable.app · In-app docs: `/docs`
+![Langplay: build a recipe, run it on a real AI, inspect every step](docs/screenshots/playground.png)
+
+## The problem
+
+LangChain and LangGraph tutorials start with Python, API keys and a notebook. Beginners never get to _see_ what a chain, a tool call, a router or a loop actually does — and when they finally build something, it stays stuck in a notebook.
+
+## What it does
+
+- **Build visually.** Stack steps (prompt, AI, tool, documents, router, critic, final answer) as a list or draw them as a graph with branches and loops.
+- **Run on real AI for free.** Free services by default, a 2-minute guide to free keys (Gemini, Groq, OpenRouter), or any OpenAI-compatible service. An offline practice mode if nothing answers.
+- **See everything.** Click any step to read the exact prompt sent, the answer, the router's choice, the critic's verdict, sources, time, tokens and cost.
+- **Real tools, no keys.** Wikipedia, web answers, an exact calculator, the clock — and search your own PDFs, read inside your browser.
+- **Learn by doing.** 12 auto-checked lessons, from your first chain to a critic loop, with XP and ranks.
+- **Compare.** Same question through two models or two recipes, side by side.
+- **Spin it out.** Turn a recipe into a tool page, a website widget, one HTML file, LangGraph Python, a Claude skill, an n8n workflow, or an MCP tool Claude can call.
 
 ## Quick start
 
 ```bash
-bun install        # or npm install
-bun run dev        # http://localhost:8080
-bun run test       # unit tests (vitest)
-bun run build      # production build
+bun install
+bun run dev:local      # http://localhost:20136
 ```
 
-## Project layout
+Live: https://langplay.lovable.app · In-app docs: `/docs` · Full setup: [INSTALL.md](INSTALL.md) · Full manual: [GUIDE.md](GUIDE.md)
 
-```
-src/routes/        index.tsx (playground), docs.tsx (documentation), __root.tsx
-src/lib/           lp-data, lp-llm, lp-models, lp-sources, lp-library
-src/components/lp/ Settings drawer, Recipe Hub, overlays, effects, React Bits ports
-src/test/          vitest suites
-```
+## Screenshots
 
-See `HANDOFF.md` for architecture, decisions and open work, and `AGENTS.md` for coding rules.
+|                                                                                          |                                                                      |
+| ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| ![Graph view with a router's two paths](docs/screenshots/graph.png)                      | ![Spin out dialog with seven formats](docs/screenshots/spin-out.png) |
+| ![A spun-out tool page answering with a real calculator](docs/screenshots/tool-page.png) | ![Phone layout, Live Run first](docs/screenshots/phone.png)          |
 
-## Privacy
+## Status
 
-No backend. Settings, API keys and progress are stored only in the browser's localStorage.
+- **Works:** everything above; 58 automated tests; spin-outs verified end to end (LangGraph 1.2, n8n, MCP over stdio, Cloudflare Worker locally).
+- **Limits:** free keyless AI services allow only a few requests (Pollinations asks for payment after a few; OVHcloud ~2 a minute) — a free key is the reliable path. Progress, recipes and documents live in the browser only; no accounts.
+- **Next:** see [HANDOFF.md](HANDOFF.md).
 
-## Credits
+## Contributing
 
-Animations adapted from [React Bits](https://reactbits.dev). Recipes and prompts sourced from LangChain cookbooks and the LangChain Hub, with links to originals.
+Issues and PRs welcome. Please read the [Code of Conduct](CODE_OF_CONDUCT.md). Security problems: see [SECURITY.md](SECURITY.md).
 
 ## License
 
-MIT — see `LICENSE`.
+[MIT](LICENSE). Third-party credits in [NOTICE](NOTICE).
