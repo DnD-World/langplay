@@ -196,7 +196,7 @@ function Playground() {
           </Button>
           <Button onClick={() => setShowSettings(true)} aria-label="Open settings" className={`${btn} hover:brightness-110`}>
             <AnimatedIcon name="settings" /> Settings
-            <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-normal">{prov === "simulator" ? "Simulator" : prov}</span>
+            <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-normal">{PROVIDERS.find(p => p.id === prov)?.name ?? prov}</span>
           </Button>
         </div>
       </header>
