@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LlmSettings, Recipe, RunResult } from "@/engine";
 import type { LessonEvent } from "@/lib/lp-lessons";
 import { LessonsCard } from "@/components/lp/play/LessonsCard";
@@ -8,6 +8,8 @@ import { cloneRecipe, defaultRecipe } from "@/lib/lp-recipes";
 import { SettingsDrawer } from "@/components/lp/SettingsDrawer";
 import { RecipeHub } from "@/components/lp/RecipeHub";
 import { AnimatedIcon } from "@/components/lp/AnimatedIcon";
+import { Button } from "@/components/ui/button";
+import { btn } from "@/components/lp/Info";
 import { Motion } from "@/components/lp/Motion";
 import "@/components/lp/Motion.css";
 import { TopBar } from "@/components/lp/play/TopBar";
@@ -28,6 +30,8 @@ import {
   useRecipe,
   writeJson,
 } from "@/components/lp/play/store";
+
+const SpinOutDialog = lazy(() => import("@/components/lp/play/SpinOutDialog"));
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -73,6 +77,7 @@ function Playground() {
   const [showHub, setShowHub] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [showDocs, setShowDocs] = useState(false);
+  const [showSpin, setShowSpin] = useState(false);
   const [docs, setDocs] = useState<StoredDoc[]>([]);
   const searchDocs = useMemo(() => docSearch(docs), [docs]);
   const [motion, setMotion] = useState(true);
@@ -184,6 +189,15 @@ function Playground() {
           provider={settings.provider}
           onLibrary={() => setShowHub(true)}
           onSettings={() => setShowSettings(true)}
+          extra={
+            <Button
+              variant="ghost"
+              onClick={() => setShowSpin(true)}
+              className={`${btn} spin-out-btn border border-primary/60 bg-card hover:border-primary`}
+            >
+              <AnimatedIcon name="spark" /> Spin out
+            </Button>
+          }
         />
 
         <div className="mission-band relative z-10 px-5 py-3">
@@ -292,6 +306,19 @@ function Playground() {
           setSettings={setSettings}
           onTested={() => complete("connect")}
         />
+        {showSpin && (
+          <Suspense fallback={null}>
+            <SpinOutDialog
+              open={showSpin}
+              onClose={() => setShowSpin(false)}
+              recipe={recipe}
+              settings={settings}
+              docs={docs.flatMap((d) => d.chunks)}
+              onEvent={addEvent}
+              setSpinout={(provider) => setRecipe((r) => ({ ...r, spinout: { provider } }))}
+            />
+          </Suspense>
+        )}
         <DocumentsDrawer
           open={showDocs}
           onClose={() => setShowDocs(false)}

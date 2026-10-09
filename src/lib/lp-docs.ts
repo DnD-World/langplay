@@ -33,7 +33,7 @@ export async function saveDocs(docs: StoredDoc[]) {
   }
 }
 
-async function pdfPages(file: File): Promise<string[]> {
+export async function pdfPages(file: File): Promise<string[]> {
   const pdfjs = await import("pdfjs-dist");
   const worker = await import("pdfjs-dist/build/pdf.worker.min.mjs?url");
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;

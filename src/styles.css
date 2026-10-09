@@ -355,3 +355,14 @@ body {
 .lp-edge-loop .react-flow__edge-path { stroke: var(--coin); stroke-dasharray: 6 4; }
 .lp-edge-route .react-flow__edge-path { stroke: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .lp-graph-node.is-running { animation: none; } }
+
+/* The Spin out button gets a slow shimmer so the "make it real" path is easy to find. */
+.spin-out-btn { position: relative; overflow: hidden; }
+.spin-out-btn::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(110deg, transparent 30%, color-mix(in oklab, var(--primary) 35%, transparent) 50%, transparent 70%);
+  transform: translateX(-100%); animation: spin-shimmer 4.5s ease-in-out infinite;
+}
+@keyframes spin-shimmer { 60%, 100% { transform: translateX(100%); } }
+.motion-off .spin-out-btn::after { display: none; }
+@media (prefers-reduced-motion: reduce) { .spin-out-btn::after { display: none; } }
