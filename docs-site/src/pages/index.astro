@@ -1,0 +1,93 @@
+---
+import DocsLayout from '../layouts/DocsLayout.astro';
+import VernacularPanels from '../components/VernacularPanels.astro';
+import FeatureCards from '../components/FeatureCards.astro';
+import Carousel from '../components/Carousel.astro';
+import { siteConfig } from '../../site.config.ts';
+
+import { Content as Dev } from '../docs/dev.md';
+import { Content as Plain } from '../docs/plain.md';
+import { Content as Eli5 } from '../docs/eli5.md';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const shot = (name: string) => `${base}/screenshots/${name}`;
+
+const features = [
+  { icon: '🧱', title: 'Build from blocks', text: 'Prompt, AI, tools, your documents, a router and a critic loop. As a list, or drawn as a graph.' },
+  { icon: '🔍', title: 'See every step', text: 'Click any step to read the exact prompt sent, the answer, the decision, sources, time, tokens and cost.' },
+  { icon: '🆓', title: 'Free to run', text: 'Works straight after install on free AI, offline on your own computer, or with any key you bring.' },
+  { icon: '🎓', title: '12 lessons', text: 'Small challenges that tick themselves off only when you really do the thing.' },
+  { icon: '🚀', title: 'Ship it', text: 'Turn a recipe into a tool page, website widget, HTML file, LangGraph Python, Claude skill, n8n flow or MCP tool.' },
+  { icon: '🪟', title: 'Windows app or web', text: 'Install it, open it in its own window or your browser, or just use the website.' },
+];
+
+const slides = [
+  { title: 'Build, run, inspect', caption: 'A recipe with a real calculator tool, run on a real AI, every step open to read.', image: shot('playground.png'), alt: 'Langplay playground with a maths recipe and its trace' },
+  { title: 'Graph view', caption: 'Routers become labelled branches, critics become loops: the LangGraph picture of your recipe.', image: shot('graph.png'), alt: 'Graph of a support router recipe' },
+  { title: 'Spin out', caption: 'Seven ways to turn a recipe into your own tool.', image: shot('spin-out.png'), alt: 'Spin out dialog' },
+  { title: 'Your own tool', caption: 'A spun-out tool page answering with a real calculator.', image: shot('tool-page.png'), alt: 'A spun-out maths tool' },
+  { title: 'On a phone', caption: 'The web version works on phones too.', image: shot('phone.png'), alt: 'Langplay on a phone' },
+];
+---
+<DocsLayout title="Overview" home>
+  <section class="hero reveal" id="top">
+    <span class="eyebrow">Free · open source · Windows & web</span>
+    <h1 class="hero-title">{siteConfig.projectName}</h1>
+    <p class="hero-sub">{siteConfig.description}</p>
+    <p class="hero-actions">
+      <a class="button primary" href="https://github.com/DnD-World/langplay/releases/latest">Download for Windows</a>
+      <a class="button" href="https://langplay.stravelakis.com">Open the web version</a>
+    </p>
+  </section>
+
+  <FeatureCards features={features} title="What Langplay does" />
+  <Carousel slides={slides} />
+
+  <section class="try reveal" id="try" aria-labelledby="try-title">
+    <h2 class="section-title" id="try-title">Try it — a real recipe, running here</h2>
+    <p class="muted">
+      This is the actual tool, not a video: a maths helper that uses a real calculator. Type a
+      question and press Run. It uses free AI services, which only allow a few questions; the full
+      app lets you add your own key or run AI offline.
+    </p>
+    <iframe
+      class="try-frame"
+      title="Langplay maths helper"
+      loading="lazy"
+      src="https://langplay.stravelakis.com/tool?embed=1#r=ZZE_TwMxDMW_iuU56sCYDSFBGZAYYEIMac_lLBI75E8LOt13R0l7baVufnHk33v2hHtKmVXQ3hksXDyhxRdXxgxrDXTQ9A1r8pESGsw1BJf-0OJ7pgwOEjkPW-e31buiCXaaoIwEUsOGUjZNCNBv9I4lA7ntCLlQXKFB0YEy2o8JeUCLLGjwm-VYx1rQoHcb8mjxuWl4TRpie2bJJdVt6baxuYNAcOAyQhk5Q-j2fyrl9sXCtJQzzuaEa6YvwKLqr3gP50Q3tLeapEdcZgJLUVCh8x5YpeXrM4-g06wzfMfi_IW-yAX_2DTcSz7QrYEn3lM34HofdklD11dncDIsS7_svB_HwYa-WITSCudPgzmyaC1oJ4xJ9zxQQotRvWfpSTLO8z8+B7"
+    ></iframe>
+  </section>
+
+  <section class="download reveal" id="download" aria-labelledby="download-title">
+    <h2 class="section-title" id="download-title">Download</h2>
+    <ol class="steps">
+      <li>Get <b>Langplay_x.y.z_x64-setup.exe</b> from the <a href="https://github.com/DnD-World/langplay/releases/latest">latest release</a>.</li>
+      <li>Run it. No admin rights needed; it installs for your user only.</li>
+      <li>Open Langplay. Ask a question and press Run — it works straight away.</li>
+    </ol>
+    <p class="muted">
+      Windows may warn that the app is from an unknown publisher (it is not code-signed, which costs
+      money). Choose <i>More info → Run anyway</i>. Update and Repair live in Settings → Advanced;
+      uninstall from Windows Settings → Apps.
+    </p>
+  </section>
+
+  <section class="doc-body reveal" id="docs" aria-label="Documentation">
+    <VernacularPanels>
+      <Dev slot="dev" />
+      <Plain slot="plain" />
+      <Eli5 slot="eli5" />
+    </VernacularPanels>
+  </section>
+</DocsLayout>
+
+<style>
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .button { display: inline-block; padding: 10px 18px; border-radius: 10px; border: 1px solid rgba(130, 216, 183, 0.5); color: inherit; text-decoration: none; font-weight: 600; }
+  .button.primary { background: #82d8b7; color: #0b0f2a; border-color: #82d8b7; }
+  .button:hover { filter: brightness(1.1); }
+  .try, .download { margin: 64px 0; }
+  .muted { opacity: 0.8; max-width: 70ch; }
+  .try-frame { width: 100%; height: 640px; border: 0; border-radius: 16px; margin-top: 16px; background: transparent; color-scheme: dark; }
+  .steps { line-height: 1.9; }
+</style>

@@ -9,6 +9,7 @@ import { Overlay } from "./Overlay";
 import { SquishToggle } from "./EffectControls";
 import { DesktopPanel } from "./DesktopPanel";
 import { isDesktop } from "@/desktop/bridge";
+import { Connections } from "./Connections";
 
 const FREE_KEY_GUIDES: Record<
   string,
@@ -145,6 +146,7 @@ export function SettingsDrawer({
         <Info tip="Turn letter animations, glowing borders, animated icons and click sparks on or off." />
       </div>
       <DesktopPanel settings={settings} setSettings={setSettings} />
+      <Connections settings={settings} setSettings={setSettings} />
       <p className="mb-5 text-sm text-muted-foreground">
         Choose which AI brain powers your recipes.
       </p>

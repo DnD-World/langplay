@@ -409,7 +409,8 @@ async fn repair(app: AppHandle) -> Result<(), String> {
     let handle = app.clone();
     tauri::async_runtime::spawn_blocking(move || {
         download_verified(&handle, "repair", &url, &dest, None)?;
-        Command::new(&dest).spawn().map_err(|e| e.to_string())?;
+        // /P = passive install: a progress bar only, no questions.
+        Command::new(&dest).arg("/P").spawn().map_err(|e| e.to_string())?;
         Ok::<(), String>(())
     })
     .await

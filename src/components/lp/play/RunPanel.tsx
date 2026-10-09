@@ -13,6 +13,7 @@ import {
 import { PROVIDERS } from "@/lib/lp-data";
 import { RECIPES } from "@/lib/lp-recipes";
 import { listSaved } from "@/lib/lp-saved";
+import { listConnections } from "@/lib/lp-connections";
 import { Button } from "@/components/ui/button";
 import { AnimatedIcon } from "../AnimatedIcon";
 import { RunThought, SquishToggle } from "../EffectControls";
@@ -52,7 +53,18 @@ function compareChoices(settings: LlmSettings): Choice[] {
   const sameService = (PROVIDERS.find((p) => p.id === settings.provider)?.models ?? [])
     .filter((m) => m !== settings.model)
     .map((model) => ({ ...settings, model }));
+  const mine = listConnections()
+    .filter(
+      (c) => !(c.settings.provider === settings.provider && c.settings.model === settings.model),
+    )
+    .map((c, i) => ({
+      id: `conn-${i}`,
+      group: "Same recipe, one of my AI connections",
+      label: c.name,
+      settings: c.settings,
+    }));
   return [
+    ...mine,
     ...[...sameService, ...keyless]
       .filter((s) => !(s.provider === settings.provider && s.model === settings.model))
       .map((s, i) => ({

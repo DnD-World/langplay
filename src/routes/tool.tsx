@@ -34,7 +34,12 @@ function ToolPage() {
       .then(async (recipe) => {
         if (cancelled || !host.current) return;
         document.title = recipe.title;
-        if (embed) document.body.style.background = "transparent";
+        // Embedded in another (dark) page: match its colour scheme, or browsers paint the frame white.
+        if (embed) {
+          document.documentElement.style.colorScheme = "dark";
+          document.documentElement.style.background = "transparent";
+          document.body.style.background = "transparent";
+        }
         runner = mountRunner(host.current, {
           recipe,
           embed,
