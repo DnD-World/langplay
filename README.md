@@ -23,12 +23,11 @@ LangChain and LangGraph tutorials start with Python, API keys and a notebook. Be
 
 ## Quick start
 
-```bash
-bun install
-bun run dev:local      # http://localhost:20136
-```
+- **Windows:** download `Langplay_x.y.z_x64-setup.exe` from the [latest release](https://github.com/DnD-World/langplay/releases/latest) and run it.
+- **Web:** https://langplay.stravelakis.com
+- **From source:** `bun install` then `bun run dev:local` (http://localhost:20136)
 
-Live: https://langplay.stravelakis.com · In-app docs: `/docs` · Full setup: [INSTALL.md](INSTALL.md) · Full manual: [GUIDE.md](GUIDE.md)
+Docs site: https://dnd-world.github.io/langplay/ · Full setup: [INSTALL.md](INSTALL.md) · Full manual: [GUIDE.md](GUIDE.md)
 
 ## Screenshots
 
@@ -40,7 +39,8 @@ Live: https://langplay.stravelakis.com · In-app docs: `/docs` · Full setup: [I
 ## Status
 
 - **Works:** everything above; 58 automated tests; spin-outs verified end to end (LangGraph 1.2, n8n, MCP over stdio, Cloudflare Worker locally).
-- **Limits:** free keyless AI services allow only a few requests (Pollinations asks for payment after a few; OVHcloud ~2 a minute) — a free key is the reliable path. Progress, recipes and documents live in the browser only; no accounts.
+- **Windows app:** installer (3.8 MB), own window or browser mode, offline AI (download a model once, no key, no internet), Update and Repair. Not code-signed, so Windows shows an "unknown publisher" warning.
+- **Limits:** free keyless AI services allow only a few requests — they exist so a fresh install works at once; use your own (often free) key or the offline AI for real use. Progress, recipes and documents stay on your device; no accounts.
 - **Next:** see [HANDOFF.md](HANDOFF.md).
 
 ## Contributing

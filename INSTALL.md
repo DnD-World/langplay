@@ -6,6 +6,7 @@ Langplay is a website, so there is nothing to install to use it: open https://la
 
 ### Requirements
 
+- For the Windows app build: Rust and the MSVC build tools (or let GitHub Actions build it — see DEPLOY.md)
 - [Bun](https://bun.sh) 1.3+ (or Node 22 with `npx bun@1.3.0 …`)
 - [gitleaks](https://github.com/gitleaks/gitleaks#installing) for the pre-commit secret check
 
