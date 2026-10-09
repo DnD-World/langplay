@@ -7,6 +7,7 @@ import { AnimatedIcon } from "./AnimatedIcon";
 import { fetchModels, presetModels, MODEL_POLICY, type ModelOption } from "@/lib/lp-models";
 import { Overlay } from "./Overlay";
 import { SquishToggle } from "./EffectControls";
+import { Connections } from "./Connections";
 
 const FREE_KEY_GUIDES: Record<
   string,
@@ -142,6 +143,7 @@ export function SettingsDrawer({
         <span className="text-sm">Motion</span>
         <Info tip="Turn letter animations, glowing borders, animated icons and click sparks on or off." />
       </div>
+      <Connections settings={settings} setSettings={setSettings} />
       <p className="mb-5 text-sm text-muted-foreground">
         Choose which AI brain powers your recipes.
       </p>
