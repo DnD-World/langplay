@@ -64,10 +64,17 @@ export function SettingsDrawer({
     try {
       const list = await fetchModels(snapshot);
       if (id !== requests.current.models || snapshot !== settingsRef.current) return;
-      setModels(list); setModelStatus(`${list.length} models loaded`);
+      if (list.length === 0) throw new Error('The service returned an empty model list.');
+      setModels(list); setModelStatus(`${list.length} models loaded from the service`);
       setSettings({ ...snapshot, modelFreeVerified: list.some(m => m.id === snapshot.model && m.free) });
     } catch(e) {
-      if (id === requests.current.models && snapshot === settingsRef.current) setModelStatus(e instanceof Error ? e.message : 'Could not load models');
+      if (id !== requests.current.models || snapshot !== settingsRef.current) return;
+      const fallback = presetModels(snapshot);
+      setModels(fallback);
+      const reason = e instanceof Error ? e.message : 'Could not load models';
+      setModelStatus(fallback.length > 0
+        ? `Live list unavailable (${reason.slice(0, 120)}). Showing ${fallback.length} suggested models instead — some services block direct browser requests.`
+        : reason);
     } finally { if (id === requests.current.models) setLoadingModels(false); }
   };
 
