@@ -1,27 +1,25 @@
 # Handoff: Langplay
 
-_Last updated: 2026-10-09 · by: Claude (Opus 5.5) · branch: `phase-10-docs` (stacked PRs #1–#10) · version: 0.2.0 (unreleased)_
+_Last updated: 2026-10-09 · by: Claude (Opus 5.5) · branch: `main` · version: 0.2.0 (unreleased)_
 
 ## In one paragraph
 
-Langplay is a browser-only playground for learning LangChain/LangGraph without code: build a recipe of steps (or a graph with branches and loops), run it on free real AI, inspect every step, learn through 12 auto-checked lessons, and spin recipes out as standalone tools (tool page, embed, HTML file, LangGraph Python, Claude skill, n8n, MCP). v2 work is done on stacked branches waiting to be merged into `main`; the live site still runs v1 until then.
+Langplay is a browser-only playground for learning LangChain/LangGraph without code: build a recipe of steps (or a graph with branches and loops), run it on free real AI, inspect every step, learn through 12 auto-checked lessons, and spin recipes out as standalone tools (tool page, embed, HTML file, LangGraph Python, Claude skill, n8n, MCP). v2 is merged into `main` and live at langplay.stravelakis.com; next comes the installable Windows app.
 
 ## Current state
 
 - **Works:** shared engine (`src/engine`), real tools, documents, graph canvas, save/share/export, compare, lessons, all 7 spin-outs, phone layout, docs page.
-- **Waiting on the owner:**
-  1. Merge PRs #1 → #10 in order (I could not merge: the permission system blocks merging without review).
-  2. Click **Publish** in Lovable after merging.
-  3. Cloudflare copy: the account has no `workers.dev` subdomain and adding a custom domain (e.g. `langplay.dnd-world.com`) is a DNS change I was not allowed to make. Either register a workers.dev subdomain in the Cloudflare dashboard (Workers → onboarding) or approve the custom domain, then run the deploy in [DEPLOY.md](DEPLOY.md).
+- **Live:** https://langplay.stravelakis.com (Cloudflare, deployed 2026-10-09) and langplay.lovable.app (after Publish in Lovable).
+- **Direction (owner, 2026-10-09):** free forever, no money; personal + downloadable Windows app to the signature standards (installer, Repair/Update, app-or-browser mode, triple docs); optional offline AI download; the website stays a live web version. Never anything the owner pays for.
 - **Known issues:** free keyless AI is thin (Pollinations asks for payment after a few requests per visitor; OVHcloud allows ~2/min); local dev on `localhost` is blocked by Pollinations' bot check (OVH works).
 - **Test suite:** yes — `bun run test` (58 tests) plus `bun run lint`, `bun run typecheck`, CI on every PR.
 
 ## Next steps, in order
 
-1. Merge and publish (above).
-2. Decide the free-AI strategy (see Open questions).
-3. Tag `v0.2.0` after the release gate in STANDARDS.md.
-4. Optional: in-browser AI with WebLLM (unlimited, private; ~0.5–1 GB download per user).
+1. Windows app with Tauri v2, built and released by GitHub Actions (installer + uninstaller, Settings → Advanced Repair/Update from GitHub Releases, window or browser mode on port 20136).
+2. Optional offline AI: llama.cpp server + a small model, downloaded on request, shown as a provider.
+3. Save several custom OpenAI-compatible endpoints.
+4. Triple-level docs site (Dev / English / ELI5) from the docs theme; tag v1.0.0.
 
 ## Run it
 
@@ -68,10 +66,10 @@ bun run test
 
 Names only. Langplay itself needs none (see `.env.example`).
 
-| Name                                            | What for                 | Where                                   |
-| ----------------------------------------------- | ------------------------ | --------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Optional Cloudflare copy | Master key file in CLAUDE SPACE/SECRETS |
+| Name                                            | What for                 | Where                                          |
+| ----------------------------------------------- | ------------------------ | ---------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Optional Cloudflare copy | Owner's private key store (never in this repo) |
 
 ## Open questions
 
-- Free AI for everyone: (a) keep keyless + free-key guide, (b) add WebLLM in-browser AI, or (c) an owner-funded proxy (Worker + owner key, per-visitor daily cap). Needs the owner's call — (c) costs money and needs a deployed Worker.
+- None blocking. Free keyless services are only for a working first run; users bring their own keys.
