@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { KINDS, QUESTS, RANKS, RECIPES, defaultSteps, mk, type Recipe, type Step, type StepKind } from "@/lib/lp-data";
+import { KINDS, PROVIDERS, QUESTS, RANKS, RECIPES, defaultSteps, mk, type Recipe, type Step, type StepKind } from "@/lib/lp-data";
 import { chat, type LlmSettings } from "@/lib/lp-llm";
 import { Info, Label, inputCls, btn } from "@/components/lp/Info";
 import { SettingsDrawer } from "@/components/lp/SettingsDrawer";
@@ -194,8 +194,9 @@ function Playground() {
             <AnimatedIcon name="tool" /> Explore Library
             <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">{RECIPES.length}</span>
           </Button>
-          <Button onClick={() => setShowSettings(true)} className={`${btn} hover:brightness-110`}>
-            <AnimatedIcon name="settings" /> {prov === "simulator" ? "Simulator" : "AI Connection"}
+          <Button onClick={() => setShowSettings(true)} aria-label="Open settings" className={`${btn} hover:brightness-110`}>
+            <AnimatedIcon name="settings" /> Settings
+            <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-normal">{PROVIDERS.find(p => p.id === prov)?.name ?? prov}</span>
           </Button>
         </div>
       </header>
