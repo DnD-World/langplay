@@ -1,29 +1,42 @@
-# Welcome to your Lovable project
+# Langplay
 
-This project was built with [Lovable](https://lovable.dev).
+A visual playground for beginners (no coding needed) to learn and experiment with LangChain and LangGraph concepts.
 
-## Build with Lovable
+- Build a recipe of steps (Input → AI Thinking → Tool/Search → Final Answer), run it, and read a plain-English explanation of every step.
+- Connect free or keyed AI providers (OpenAI-compatible), or use the zero-network Offline Simulator.
+- Browse ready recipes, LangChain cookbooks, LangChain Hub prompts and an extensions catalogue.
+- XP, coins, ranks and quests built into the learning flow.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Live: https://langplay.lovable.app · In-app docs: `/docs`
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+## Quick start
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+bun install        # or npm install
+bun run dev        # http://localhost:8080
+bun run test       # unit tests (vitest)
+bun run build      # production build
 ```
 
-## Built with
+## Project layout
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+```
+src/routes/        index.tsx (playground), docs.tsx (documentation), __root.tsx
+src/lib/           lp-data, lp-llm, lp-models, lp-sources, lp-library
+src/components/lp/ Settings drawer, Recipe Hub, overlays, effects, React Bits ports
+src/test/          vitest suites
+```
+
+See `HANDOFF.md` for architecture, decisions and open work, and `AGENTS.md` for coding rules.
+
+## Privacy
+
+No backend. Settings, API keys and progress are stored only in the browser's localStorage.
+
+## Credits
+
+Animations adapted from [React Bits](https://reactbits.dev). Recipes and prompts sourced from LangChain cookbooks and the LangChain Hub, with links to originals.
+
+## License
+
+MIT — see `LICENSE`.
