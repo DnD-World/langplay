@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { KINDS, PROVIDERS, QUESTS, RANKS, RECIPES, defaultSteps, mk, type Recipe, type Step, type StepKind } from "@/lib/lp-data";
 import { chat, type LlmSettings } from "@/lib/lp-llm";
@@ -190,6 +190,9 @@ function Playground() {
           </div>
           <div className="nav-stat font-bold text-primary"><AnimatedIcon name="spark" /> {points} XP</div>
           <div className="nav-stat font-bold text-coin"><AnimatedIcon name="coin" /> {coins}<Info tip="Token Coins — a fun reward you collect for finishing quests." /></div>
+          <Button asChild variant="ghost" className={`${btn} border bg-card hover:border-primary`}>
+            <Link to="/docs">Docs</Link>
+          </Button>
           <Button variant="ghost" onClick={() => setShowHub(true)} className={`${btn} relative border bg-card hover:border-primary`}>
             <AnimatedIcon name="tool" /> Explore Library
             <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">{RECIPES.length}</span>
