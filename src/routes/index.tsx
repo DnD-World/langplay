@@ -200,6 +200,7 @@ function Playground() {
             removeNode={removeNode}
             moveNode={moveNode}
             onTitle={(title) => setRecipe((r) => ({ ...r, title }))}
+            setRecipe={setRecipe}
             onMilestone={complete}
             onOpenDocs={() => setShowDocs(true)}
             docCount={docs.length}

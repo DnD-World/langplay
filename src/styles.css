@@ -309,3 +309,49 @@ body {
     display: none;
   }
 }
+
+/* Graph canvas (React Flow) in the Langplay look */
+.lp-graph {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--background) 85%, black);
+}
+.lp-graph .react-flow {
+  --xy-background-color: transparent;
+  --xy-background-pattern-color: color-mix(in oklab, var(--primary) 18%, transparent);
+  --xy-edge-stroke: color-mix(in oklab, var(--primary) 70%, var(--foreground));
+  --xy-edge-stroke-selected: var(--accent);
+  --xy-edge-label-background-color: var(--card);
+  --xy-edge-label-color: var(--primary);
+  --xy-controls-button-background-color: var(--card);
+  --xy-controls-button-background-color-hover: var(--secondary);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-attribution-background-color: transparent;
+  font-family: var(--font-sans);
+}
+.lp-graph .react-flow__attribution a { color: var(--muted-foreground); }
+.lp-graph-node {
+  width: 190px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, var(--card), var(--secondary));
+  color: var(--foreground);
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.6);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.lp-graph-node:hover { border-color: color-mix(in oklab, var(--primary) 60%, var(--border)); }
+.lp-graph-node.is-active { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 35%, transparent), 0 8px 24px -8px var(--primary); }
+.lp-graph-node.is-running { animation: lp-node-pulse 1s ease-in-out infinite; border-color: var(--accent); }
+.lp-graph-node[data-kind="router"] { border-style: dashed; }
+.lp-graph-node[data-kind="critic"] { background: linear-gradient(160deg, var(--card), color-mix(in oklab, var(--coin) 12%, var(--secondary))); }
+.lp-graph-node[data-kind="final"] { background: linear-gradient(160deg, var(--card), color-mix(in oklab, var(--primary) 18%, var(--secondary))); }
+@keyframes lp-node-pulse { 50% { box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 30%, transparent); transform: scale(1.03); } }
+.lp-handle { width: 10px !important; height: 10px !important; background: var(--primary) !important; border: 2px solid var(--card) !important; }
+.lp-handle-route { bottom: -16px !important; }
+.lp-handle-retry { background: var(--coin) !important; }
+.lp-edge-loop .react-flow__edge-path { stroke: var(--coin); stroke-dasharray: 6 4; }
+.lp-edge-route .react-flow__edge-path { stroke: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .lp-graph-node.is-running { animation: none; } }

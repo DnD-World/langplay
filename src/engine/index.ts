@@ -16,3 +16,4 @@ export { calculate, extractExpression, formatNumber } from "./calc";
 export { chunkPages, textToPages, searchChunks, tokenize, type DocChunk } from "./docs";
 export { costOf, formatCost, type Cost } from "./cost";
 export { encodeRecipe, decodeRecipe, recipeCodeFromHash } from "./share";
+export { graphEdges, layoutRecipe, type GraphEdge } from "./layout";

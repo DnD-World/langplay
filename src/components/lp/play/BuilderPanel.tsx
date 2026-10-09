@@ -16,6 +16,7 @@ import { AnimatedIcon } from "../AnimatedIcon";
 import { HoldDelete } from "../EffectControls";
 import { Info, Label, inputCls } from "../Info";
 import { StarFrame } from "../Motion";
+import { GraphView } from "./GraphView";
 
 type Props = {
   recipe: Recipe;
@@ -29,7 +30,7 @@ type Props = {
   moveNode: (id: string, toIndex: number) => void;
   onTitle: (title: string) => void;
   onMilestone: (id: string) => void;
-  graphView?: ReactNode;
+  setRecipe: (fn: (r: Recipe) => Recipe) => void;
   onOpenDocs: () => void;
   docCount: number;
   menu?: ReactNode;
@@ -315,6 +316,16 @@ export function BuilderPanel(props: Props) {
   } = props;
   const [dragId, setDragId] = useState<string | null>(null);
   const [view, setView] = useState<"steps" | "graph">("steps");
+  const activeNode = recipe.nodes.find((n) => n.id === activeId) ?? null;
+  const editorFor = (node: RecipeNode) => (
+    <StepEditor
+      recipe={recipe}
+      node={node}
+      updateNode={updateNode}
+      onOpenDocs={props.onOpenDocs}
+      docCount={props.docCount}
+    />
+  );
 
   return (
     <section className="rounded-lg border bg-card/90 p-4" aria-label="Recipe builder">
@@ -343,7 +354,7 @@ export function BuilderPanel(props: Props) {
           Original recipe / prompt ↗
         </a>
       )}
-      {props.graphView && (
+      {
         <div className="mb-3 grid grid-cols-2 gap-1 rounded-lg border p-1" role="tablist">
           {(["steps", "graph"] as const).map((v) => (
             <Button
@@ -358,9 +369,27 @@ export function BuilderPanel(props: Props) {
             </Button>
           ))}
         </div>
-      )}
-      {view === "graph" && props.graphView ? (
-        props.graphView
+      }
+      {view === "graph" ? (
+        <>
+          <GraphView
+            recipe={recipe}
+            activeId={activeId}
+            runningId={runningId}
+            onSelect={setActiveId}
+            updateNode={updateNode}
+            setRecipe={props.setRecipe}
+            editor={activeNode ? editorFor(activeNode) : null}
+          />
+          {activeNode && (
+            <div className="mt-3 rounded-lg border p-3">
+              <div className="flex items-center gap-2 text-sm font-bold">
+                <AnimatedIcon name={activeNode.kind} /> {activeNode.label}
+              </div>
+              {editorFor(activeNode)}
+            </div>
+          )}
+        </>
       ) : (
         <ol className="space-y-1">
           {recipe.nodes.map((s, i) => (
