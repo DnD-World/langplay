@@ -70,11 +70,19 @@
   --accent: oklch(0.85 0.15 200);
   --radius: 0px;
 }
-.retro, .retro * { font-family: var(--font-pixel) !important; letter-spacing: 0; }
-.retro { font-size: 11px; }
+.retro,
+.retro * {
+  font-family: var(--font-pixel) !important;
+  letter-spacing: 0;
+}
+.retro {
+  font-size: 11px;
+}
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -83,53 +91,222 @@
 }
 
 @utility bg-grid {
-  background-image:
-    radial-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px);
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--primary) 12%, transparent) 1px,
+    transparent 1px
+  );
   background-size: 22px 22px;
 }
 
-@keyframes pop { 0% { transform: scale(.6); opacity: 0 } 60% { transform: scale(1.08) } 100% { transform: scale(1); opacity: 1 } }
-@utility animate-pop { animation: pop .35s ease-out both; }
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@utility animate-pop {
+  animation: pop 0.35s ease-out both;
+}
 
-* { letter-spacing: 0; }
-.langplay-workspace > section { border-radius: 0; border: 0; background: transparent; }
-.langplay-workspace > section:first-child { border-right: 1px solid var(--border); }
-.langplay-workspace > section:last-child > div { border-radius: 0; border: 0; background: transparent; }
-.langplay-workspace { position: relative; z-index: 1; }
-.brand-logo { width: 56px; height: 48px; object-fit: cover; border-radius: 6px; }
-.animated-icon { display: inline-flex; flex-shrink: 0; vertical-align: middle; color: var(--primary); }
-.animated-icon svg { width: 1em; height: 1em; }
-.animated-icon { animation: icon-breathe 3.5s ease-in-out infinite; }
-.icon-settings svg { animation: icon-turn 10s linear infinite; }
-.icon-tool svg, .icon-inspect svg { animation: icon-scan 3s ease-in-out infinite; }
-.icon-agent svg path, .icon-spark svg path, .icon-idea svg path { animation: icon-trace 3s ease-in-out infinite; stroke-dasharray: 50; }
-.icon-play svg, .icon-up svg, .icon-down svg { animation: icon-nudge 2.8s ease-in-out infinite; }
-.icon-coin svg, .icon-crown svg, .icon-trophy svg { animation: icon-wiggle 4s ease-in-out infinite; }
-button:hover .animated-icon, .group:hover .animated-icon { animation: icon-wiggle .6s ease-in-out; }
-@keyframes icon-breathe { 50% { opacity: .8; transform: scale(1.06); } }
-@keyframes icon-turn { to { transform: rotate(360deg); } }
-@keyframes icon-scan { 50% { transform: translateX(2px) rotate(8deg); } }
-@keyframes icon-nudge { 50% { transform: translateY(-2px); } }
-@keyframes icon-trace { 50% { stroke-dashoffset: 12; opacity: .7; } }
-@keyframes icon-wiggle { 30% { transform: rotate(-12deg) scale(1.15); } 70% { transform: rotate(8deg); } }
-.mission-band { background: var(--card); border-bottom: 1px solid var(--border); }
-.mission-band progress { width: 100%; height: 5px; accent-color: var(--primary); }
-@media (max-width: 1023px) { .langplay-workspace > section:first-child { border-right: 0; border-bottom: 1px solid var(--border); } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+* {
+  letter-spacing: 0;
+}
+.langplay-workspace > section {
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+}
+.langplay-workspace > section:first-child {
+  border-right: 1px solid var(--border);
+}
+.langplay-workspace > section:last-child > div {
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+}
+.langplay-workspace {
+  position: relative;
+  z-index: 1;
+}
+.brand-logo {
+  width: 56px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+.animated-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  vertical-align: middle;
+  color: var(--primary);
+}
+.animated-icon svg {
+  width: 1em;
+  height: 1em;
+}
+.animated-icon {
+  animation: icon-breathe 3.5s ease-in-out infinite;
+}
+.icon-settings svg {
+  animation: icon-turn 10s linear infinite;
+}
+.icon-tool svg,
+.icon-inspect svg {
+  animation: icon-scan 3s ease-in-out infinite;
+}
+.icon-agent svg path,
+.icon-spark svg path,
+.icon-idea svg path {
+  animation: icon-trace 3s ease-in-out infinite;
+  stroke-dasharray: 50;
+}
+.icon-play svg,
+.icon-up svg,
+.icon-down svg {
+  animation: icon-nudge 2.8s ease-in-out infinite;
+}
+.icon-coin svg,
+.icon-crown svg,
+.icon-trophy svg {
+  animation: icon-wiggle 4s ease-in-out infinite;
+}
+button:hover .animated-icon,
+.group:hover .animated-icon {
+  animation: icon-wiggle 0.6s ease-in-out;
+}
+@keyframes icon-breathe {
+  50% {
+    opacity: 0.8;
+    transform: scale(1.06);
+  }
+}
+@keyframes icon-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes icon-scan {
+  50% {
+    transform: translateX(2px) rotate(8deg);
+  }
+}
+@keyframes icon-nudge {
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes icon-trace {
+  50% {
+    stroke-dashoffset: 12;
+    opacity: 0.7;
+  }
+}
+@keyframes icon-wiggle {
+  30% {
+    transform: rotate(-12deg) scale(1.15);
+  }
+  70% {
+    transform: rotate(8deg);
+  }
+}
+.mission-band {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.mission-band progress {
+  width: 100%;
+  height: 5px;
+  accent-color: var(--primary);
+}
+@media (max-width: 1023px) {
+  .langplay-workspace > section:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 
-.langplay-workspace > section { min-width: 0; }
-html, body { overflow-x: clip; }
-.langplay-workspace code { overflow-wrap: anywhere; white-space: normal; }
-.langplay-workspace button .animated-icon { color: currentColor; }
-.langplay-workspace > section { position: relative; }
-.langplay-workspace .concept-band { border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--card); }
-.recipe-step { outline: none; }
-.recipe-step:focus-visible { box-shadow: 0 0 0 2px var(--ring); }
-.nav-stat { display: flex; align-items: center; gap: 6px; padding: 4px 8px; font-size: 12px; }
-.motion-background + div, .spark-content { position: relative; }
-.spark-canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 80; }
-.motion-off .border-glow-card::before, .motion-off .edge-light { display: none; }
-.recipe-step .animated-icon, .recipe-step .animated-icon svg { animation-duration: 5s; }
-@media (prefers-reduced-motion: reduce) { .border-glow-card::before, .edge-light { display: none; } }
-.star-frame .star-inner > div { border-radius: 7px; }
-@media (hover: none), (pointer: coarse) { .target-cursor-wrapper { display: none; } }
+.langplay-workspace > section {
+  min-width: 0;
+}
+html,
+body {
+  overflow-x: clip;
+}
+.langplay-workspace code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+.langplay-workspace button .animated-icon {
+  color: currentColor;
+}
+.langplay-workspace > section {
+  position: relative;
+}
+.langplay-workspace .concept-band {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--card);
+}
+.recipe-step {
+  outline: none;
+}
+.recipe-step:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.nav-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.motion-background + div,
+.spark-content {
+  position: relative;
+}
+.spark-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 80;
+}
+.motion-off .border-glow-card::before,
+.motion-off .edge-light {
+  display: none;
+}
+.recipe-step .animated-icon,
+.recipe-step .animated-icon svg {
+  animation-duration: 5s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-glow-card::before,
+  .edge-light {
+    display: none;
+  }
+}
+.star-frame .star-inner > div {
+  border-radius: 7px;
+}
+@media (hover: none), (pointer: coarse) {
+  .target-cursor-wrapper {
+    display: none;
+  }
+}

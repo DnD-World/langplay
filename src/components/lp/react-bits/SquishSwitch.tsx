@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   useEffect,
@@ -7,11 +7,19 @@ import React, {
   useState,
   type CSSProperties,
   type KeyboardEvent,
-  type PointerEvent
-} from 'react';
-import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from 'motion/react';
-import { Button } from '@/components/ui/button';
-import './SquishSwitch.css';
+  type PointerEvent,
+} from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+} from "motion/react";
+import { Button } from "@/components/ui/button";
+import "./SquishSwitch.css";
 
 export interface SquishSwitchProps {
   checked?: boolean;
@@ -56,12 +64,12 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
   checked,
   defaultChecked = false,
   onChange,
-  label = '',
+  label = "",
   disabled = false,
-  trackColor = 'var(--muted)',
-  trackOnColor = 'var(--primary)',
-  thumbColor = 'var(--foreground)',
-  thumbOnColor = 'var(--primary-foreground)',
+  trackColor = "var(--muted)",
+  trackOnColor = "var(--primary)",
+  thumbColor = "var(--foreground)",
+  thumbOnColor = "var(--primary-foreground)",
   width = 76,
   height = 38,
   radius = 19,
@@ -70,16 +78,16 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
   hoverScale = 1.035,
   colorDuration = 320,
   ariaLabel,
-  className = '',
-  id
+  className = "",
+  id,
 }) => {
   const systemReduce = useReducedMotion();
   const [motionOff, setMotionOff] = useState(false);
   useEffect(() => {
-    const update = () => setMotionOff(document.documentElement.classList.contains('motion-off'));
+    const update = () => setMotionOff(document.documentElement.classList.contains("motion-off"));
     update();
     const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
   const reduce = systemReduce || motionOff;
@@ -126,12 +134,12 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
       return undefined;
     }
     const controls = animate(x, target, {
-      type: 'spring',
+      type: "spring",
       stiffness: 170 - (50 - clamp(speed, 0, 100)) * 1.1,
       damping: 21.5,
       mass: 0.9,
       restDelta: 0.001,
-      restSpeed: 0.01
+      restSpeed: 0.01,
     });
     return () => controls.stop();
   }, [on, dragging, min, max, speed, reduce, x]);
@@ -151,11 +159,13 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
       moved: false,
       startX: e.clientX,
       onAtPress: onRef.current,
-      slop: e.pointerType === 'touch' ? TAP_SLOP.coarse : TAP_SLOP.fine
+      slop: e.pointerType === "touch" ? TAP_SLOP.coarse : TAP_SLOP.fine,
     };
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      /* best effort: pointer capture or storage may be unavailable */
+    }
     setDragging(true);
   };
   const move = (e: PointerEvent<HTMLButtonElement>) => {
@@ -178,7 +188,9 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
     grip.current = null;
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      /* best effort: pointer capture or storage may be unavailable */
+    }
     if (cancelled) commit(g.onAtPress);
     else if (!g.moved) commit(!onRef.current);
     skipClick.current = true;
@@ -196,8 +208,9 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
   };
 
   return (
-    <span className={`squish-switch-root${className ? ` ${className}` : ''}`}>
-      <Button variant="ghost"
+    <span className={`squish-switch-root${className ? ` ${className}` : ""}`}>
+      <Button
+        variant="ghost"
         id={buttonId}
         type="button"
         disabled={disabled}
@@ -206,39 +219,44 @@ const SquishSwitch: React.FC<SquishSwitchProps> = ({
         aria-disabled={disabled || undefined}
         aria-label={ariaLabel}
         className="squish-switch"
-        data-on={on ? '' : undefined}
-        data-held={dragging ? '' : undefined}
+        data-on={on ? "" : undefined}
+        data-held={dragging ? "" : undefined}
         style={
           {
-            '--ss-w': `${width}px`,
-            '--ss-h': `${height}px`,
-            '--ss-inset': `${inset}px`,
-            '--ss-thumb': `${thumb}px`,
-            '--ss-r': `${trackRadius}px`,
-            '--ss-thumb-r': `${thumbRadius}px`,
-            '--ss-track': trackColor,
-            '--ss-track-on': trackOnColor,
-            '--ss-thumb-color': thumbColor || `color-mix(in srgb, ${trackOnColor} 19%, ${trackColor})`,
-            '--ss-thumb-on': thumbOnColor || trackColor,
-            '--ss-fade': `${colorDuration}ms`
+            "--ss-w": `${width}px`,
+            "--ss-h": `${height}px`,
+            "--ss-inset": `${inset}px`,
+            "--ss-thumb": `${thumb}px`,
+            "--ss-r": `${trackRadius}px`,
+            "--ss-thumb-r": `${thumbRadius}px`,
+            "--ss-track": trackColor,
+            "--ss-track-on": trackOnColor,
+            "--ss-thumb-color":
+              thumbColor || `color-mix(in srgb, ${trackOnColor} 19%, ${trackColor})`,
+            "--ss-thumb-on": thumbOnColor || trackColor,
+            "--ss-fade": `${colorDuration}ms`,
           } as CSSProperties
         }
         onPointerDown={down}
         onPointerMove={move}
-        onPointerUp={e => up(e, false)}
-        onPointerCancel={e => up(e, true)}
+        onPointerUp={(e) => up(e, false)}
+        onPointerCancel={(e) => up(e, true)}
         onPointerEnter={(e: PointerEvent<HTMLButtonElement>) => {
-          if (e.pointerType === 'mouse' && !disabled) swell.set(hoverScale);
+          if (e.pointerType === "mouse" && !disabled) swell.set(hoverScale);
         }}
         onPointerLeave={() => swell.set(1)}
         onKeyDown={(e: KeyboardEvent<HTMLButtonElement>) => {
-          if (e.key === 'Escape' && grip.current)
+          if (e.key === "Escape" && grip.current)
             up({ pointerId: grip.current.id, currentTarget: e.currentTarget }, true);
         }}
         onClick={click}
       >
         <span ref={trackRef} className="squish-switch__track">
-          <motion.span className="squish-switch__thumb" aria-hidden="true" style={{ x, scaleX, scaleY }} />
+          <motion.span
+            className="squish-switch__thumb"
+            aria-hidden="true"
+            style={{ x, scaleX, scaleY }}
+          />
         </span>
       </Button>
       {label ? (

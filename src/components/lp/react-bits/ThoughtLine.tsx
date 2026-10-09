@@ -1,13 +1,20 @@
-'use client';
+"use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { animate, useReducedMotion, type AnimationPlaybackControls } from 'motion/react';
-import { ChevronDown, Sparkles, Check } from 'lucide-react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { animate, useReducedMotion, type AnimationPlaybackControls } from "motion/react";
+import { ChevronDown, Sparkles, Check } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import './ThoughtLine.css';
+import { Button } from "@/components/ui/button";
+import "./ThoughtLine.css";
 
-export type ThoughtLineGlyph = 'sparkle' | 'dot' | 'none' | ReactNode;
+export type ThoughtLineGlyph = "sparkle" | "dot" | "none" | ReactNode;
 
 export interface ThoughtLineProps {
   label?: string;
@@ -41,22 +48,24 @@ const GLYPH_DONE = 0.55;
 const EMPTY_STEPS: string[] = [];
 
 const fmt = (ds: number) =>
-  ds < 600 ? `${(ds / 10).toFixed(1)}s` : `${Math.floor(ds / 600)}m ${((ds % 600) / 10).toFixed(1)}s`;
+  ds < 600
+    ? `${(ds / 10).toFixed(1)}s`
+    : `${Math.floor(ds / 600)}m ${((ds % 600) / 10).toFixed(1)}s`;
 const spoken = (ds: number) =>
   ds < 600
     ? `${(ds / 10).toFixed(1)} seconds`
     : `${Math.floor(ds / 600)} minutes ${((ds % 600) / 10).toFixed(1)} seconds`;
 
 const ThoughtLine: React.FC<ThoughtLineProps> = ({
-  label = 'Thinking…',
-  doneLabel = '',
+  label = "Thinking…",
+  doneLabel = "",
   renderLabel,
-  glyph = 'sparkle',
+  glyph = "sparkle",
   steps = EMPTY_STEPS,
   collapsible = true,
   collapseOnSettle = true,
-  color = 'currentColor',
-  glyphColor = '',
+  color = "currentColor",
+  glyphColor = "",
   fontSize = 16,
   breathPeriod = 1.6,
   breathDepth = 0.45,
@@ -69,14 +78,14 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
   elapsed,
   showTimer = true,
   onSettle,
-  className = '',
-  style
+  className = "",
+  style,
 }) => {
   const reduce = useReducedMotion();
   const [autoSettled, setAutoSettled] = useState(false);
   const [open, setOpen] = useState(true);
   const isWorking = working && !autoSettled;
-  const doneText = doneLabel || (showTimer ? 'Thought for' : 'Done thinking');
+  const doneText = doneLabel || (showTimer ? "Thought for" : "Done thinking");
   const hasTrace = steps.length > 0;
   const depth = reduce ? Math.min(breathDepth, 0.2) : breathDepth;
   const period = reduce ? breathPeriod * 1.5 : breathPeriod;
@@ -109,12 +118,17 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
     if (!breathEl) return undefined;
     const s = settleDuration / 1000;
     const loop = (el: HTMLElement, delay: number) =>
-      animate(el, { opacity: [trough, 1, trough] }, { duration: period, ease: EASE_IN_OUT, repeat: Infinity, delay });
+      animate(
+        el,
+        { opacity: [trough, 1, trough] },
+        { duration: period, ease: EASE_IN_OUT, repeat: Infinity, delay },
+      );
     let cancelled = false;
     const running: AnimationPlaybackControls[] = [];
     if (isWorking) {
       if (depth > 0) {
-        if (sheen) running.push(animate(breathEl, { opacity: 1 }, { duration: 0.2, ease: EASE_OUT }));
+        if (sheen)
+          running.push(animate(breathEl, { opacity: 1 }, { duration: 0.2, ease: EASE_OUT }));
         if (glyphEl) {
           const lead = animate(glyphEl, { opacity: trough }, { duration: 0.2, ease: EASE_OUT });
           running.push(lead);
@@ -127,16 +141,18 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
           running.push(loop(breathEl, 0.14));
         }
       } else {
-        if (glyphEl) running.push(animate(glyphEl, { opacity: 1 }, { duration: 0.2, ease: EASE_OUT }));
+        if (glyphEl)
+          running.push(animate(glyphEl, { opacity: 1 }, { duration: 0.2, ease: EASE_OUT }));
         running.push(animate(breathEl, { opacity: 1 }, { duration: 0.2, ease: EASE_OUT }));
       }
     } else {
-      if (glyphEl) running.push(animate(glyphEl, { opacity: GLYPH_DONE }, { duration: s, ease: EASE_OUT }));
+      if (glyphEl)
+        running.push(animate(glyphEl, { opacity: GLYPH_DONE }, { duration: s, ease: EASE_OUT }));
       running.push(animate(breathEl, { opacity: 1 }, { duration: s, ease: EASE_OUT }));
     }
     return () => {
       cancelled = true;
-      running.forEach(a => a.stop());
+      running.forEach((a) => a.stop());
     };
   }, [isWorking, period, depth, trough, settleDuration, glyph, sheen]);
 
@@ -168,11 +184,11 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
       const active = isWorking ? workRef.current : doneRef.current;
       if (!active) return;
       const shift = active.offsetWidth - stack.offsetWidth;
-      if (!glide) t.style.transition = 'none';
+      if (!glide) t.style.transition = "none";
       t.style.transform = `translateX(${shift}px)`;
       if (!glide) {
         void t.offsetWidth;
-        t.style.transition = '';
+        t.style.transition = "";
       }
     };
     place(prevWorking.current !== isWorking);
@@ -196,11 +212,11 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
   const toggle = hasTrace && collapsible;
   const head = (
     <>
-      {glyph !== 'none' ? (
+      {glyph !== "none" ? (
         <span ref={glyphRef} className="thought-line__glyph" aria-hidden="true">
-          {glyph === 'sparkle' ? (
+          {glyph === "sparkle" ? (
             <Sparkles size="100%" strokeWidth={2} />
-          ) : glyph === 'dot' ? (
+          ) : glyph === "dot" ? (
             <span className="thought-line__dot" />
           ) : (
             glyph
@@ -208,26 +224,39 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
         </span>
       ) : null}
       <span ref={stackRef} className="thought-line__label" aria-hidden="true">
-        <span ref={workRef} className="thought-line__text" data-active={isWorking ? '' : undefined}>
-          <span ref={breathRef} className="thought-line__breath" data-shimmer={sheen ? '' : undefined}>
+        <span ref={workRef} className="thought-line__text" data-active={isWorking ? "" : undefined}>
+          <span
+            ref={breathRef}
+            className="thought-line__breath"
+            data-shimmer={sheen ? "" : undefined}
+          >
             {renderLabel ? renderLabel(label, true) : label}
           </span>
         </span>
         <span
           ref={doneRef}
           className="thought-line__text thought-line__text--done"
-          data-active={isWorking ? undefined : ''}
+          data-active={isWorking ? undefined : ""}
         >
           {renderLabel ? renderLabel(doneText, false) : doneText}
         </span>
       </span>
       {showTimer ? (
-        <span ref={timerRef} className="thought-line__timer" data-done={isWorking ? undefined : ''} aria-hidden="true">
+        <span
+          ref={timerRef}
+          className="thought-line__timer"
+          data-done={isWorking ? undefined : ""}
+          aria-hidden="true"
+        >
           0.0s
         </span>
       ) : null}
       {collapsible ? (
-        <span className="thought-line__chevron" data-on={hasTrace ? '' : undefined} aria-hidden="true">
+        <span
+          className="thought-line__chevron"
+          data-on={hasTrace ? "" : undefined}
+          aria-hidden="true"
+        >
           <ChevronDown size="1em" strokeWidth={2.2} />
         </span>
       ) : null}
@@ -239,30 +268,31 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
 
   return (
     <div
-      className={`thought-line${className ? ` ${className}` : ''}`}
-      data-working={isWorking ? '' : undefined}
-      data-open={open && hasTrace ? '' : undefined}
+      className={`thought-line${className ? ` ${className}` : ""}`}
+      data-working={isWorking ? "" : undefined}
+      data-open={open && hasTrace ? "" : undefined}
       style={
         {
-          '--tl-font': `${fontSize}px`,
-          '--tl-color': color,
-          '--tl-glyph': glyphColor || color,
-          '--tl-settle': `${settleDuration}ms`,
-          '--tl-blur': `${settleBlur}px`,
-          '--tl-shimmer': `${shimmerDuration}s`,
-          ...style
+          "--tl-font": `${fontSize}px`,
+          "--tl-color": color,
+          "--tl-glyph": glyphColor || color,
+          "--tl-settle": `${settleDuration}ms`,
+          "--tl-blur": `${settleBlur}px`,
+          "--tl-shimmer": `${shimmerDuration}s`,
+          ...style,
         } as CSSProperties
       }
     >
       {collapsible ? (
-        <Button variant="ghost"
+        <Button
+          variant="ghost"
           type="button"
           className="thought-line__head"
-          data-toggle={toggle ? '' : undefined}
+          data-toggle={toggle ? "" : undefined}
           aria-expanded={toggle ? open : undefined}
           tabIndex={toggle ? 0 : -1}
           onClick={() => {
-            if (toggle) setOpen(v => !v);
+            if (toggle) setOpen((v) => !v);
           }}
         >
           {head}
@@ -271,13 +301,17 @@ const ThoughtLine: React.FC<ThoughtLineProps> = ({
         <div className="thought-line__head">{head}</div>
       )}
       {hasTrace ? (
-        <div className="thought-line__trace" data-open={open ? '' : undefined} aria-hidden={!open}>
+        <div className="thought-line__trace" data-open={open ? "" : undefined} aria-hidden={!open}>
           <div className="thought-line__fold">
             <div className="thought-line__steps">
               {steps.map((text, i) => {
                 const done = !isWorking || i < steps.length - 1;
                 return (
-                  <div key={`${i}-${text}`} className="thought-line__step" data-done={done ? '' : undefined}>
+                  <div
+                    key={`${i}-${text}`}
+                    className="thought-line__step"
+                    data-done={done ? "" : undefined}
+                  >
                     <span className="thought-line__mark" aria-hidden="true">
                       {done ? (
                         <Check size="1em" strokeWidth={2.5} />

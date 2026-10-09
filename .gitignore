@@ -36,3 +36,6 @@ dist-ssr
 tsconfig.tsbuildinfo
 dist
 .output
+
+# Local agent tooling
+.claude/

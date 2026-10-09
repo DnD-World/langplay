@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from "react";
 
 const ClickSpark = ({
-  sparkColor = 'var(--primary)',
+  sparkColor = "var(--primary)",
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
   duration = 400,
-  easing = 'ease-out',
+  easing = "ease-out",
   extraScale = 1.0,
-  children
+  children,
 }) => {
   const canvasRef = useRef(null);
   const sparksRef = useRef([]);
@@ -23,7 +23,8 @@ const ClickSpark = ({
     let resizeTimeout;
 
     const resizeCanvas = () => {
-      const width = window.innerWidth, height = window.innerHeight;
+      const width = window.innerWidth,
+        height = window.innerHeight;
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -35,47 +36,47 @@ const ClickSpark = ({
       resizeTimeout = setTimeout(resizeCanvas, 100);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     resizeCanvas();
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimeout);
     };
   }, []);
 
   const easeFunc = useCallback(
-    t => {
+    (t) => {
       switch (easing) {
-        case 'linear':
+        case "linear":
           return t;
-        case 'ease-in':
+        case "ease-in":
           return t * t;
-        case 'ease-in-out':
+        case "ease-in-out":
           return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
         default:
           return t * (2 - t);
       }
     },
-    [easing]
+    [easing],
   );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     let animationId;
 
-    const draw = timestamp => {
+    const draw = (timestamp) => {
       if (!startTimeRef.current) {
         startTimeRef.current = timestamp;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      sparksRef.current = sparksRef.current.filter(spark => {
+      sparksRef.current = sparksRef.current.filter((spark) => {
         const elapsed = timestamp - spark.startTime;
         if (elapsed >= duration) {
           return false;
@@ -105,25 +106,29 @@ const ClickSpark = ({
       animationId = sparksRef.current.length ? requestAnimationFrame(draw) : null;
     };
 
-    const click = e => {
+    const click = (e) => {
       const now = performance.now();
-      sparksRef.current.push(...Array.from({ length: sparkCount }, (_, i) => ({ x: e.clientX, y: e.clientY, angle: (2 * Math.PI * i) / sparkCount, startTime: now })));
+      sparksRef.current.push(
+        ...Array.from({ length: sparkCount }, (_, i) => ({
+          x: e.clientX,
+          y: e.clientY,
+          angle: (2 * Math.PI * i) / sparkCount,
+          startTime: now,
+        })),
+      );
       if (!animationId) animationId = requestAnimationFrame(draw);
     };
-    document.addEventListener('click', click, true);
+    document.addEventListener("click", click, true);
 
     return () => {
       cancelAnimationFrame(animationId);
-      document.removeEventListener('click', click, true);
+      document.removeEventListener("click", click, true);
     };
   }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, easeFunc, extraScale]);
 
   return (
     <div className="spark-content">
-      <canvas
-        ref={canvasRef}
-        className="spark-canvas" aria-hidden="true"
-      />
+      <canvas ref={canvasRef} className="spark-canvas" aria-hidden="true" />
       {children}
     </div>
   );

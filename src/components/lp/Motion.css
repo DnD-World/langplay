@@ -1,9 +1,42 @@
-.motion-background { position: fixed; inset: 0; opacity: .045; pointer-events: none; z-index: 0; }
-.letter-glitch, .letter-glitch canvas { width: 100%; height: 100%; display: block; }
-.star-frame { position: relative; overflow: visible; border-radius: 8px; }
-.star-frame > .border-glow-inner > div { border: 0; }
-.hold-button.hold-delete { width: 28px; height: 28px; padding: 0; min-width: 28px; }
-.hold-delete .hold-button__icon { margin: 0; }
-.squish-switch:focus-visible { outline: 2px solid var(--ring); outline-offset: 4px; }
-.motion-off .animated-icon, .motion-off .animated-icon svg, .motion-off .animated-icon svg * { animation: none !important; }
-.motion-off .squish-switch__track { transition: none; }
+.motion-background {
+  position: fixed;
+  inset: 0;
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 0;
+}
+.letter-glitch,
+.letter-glitch canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.star-frame {
+  position: relative;
+  overflow: visible;
+  border-radius: 8px;
+}
+.star-frame > .border-glow-inner > div {
+  border: 0;
+}
+.hold-button.hold-delete {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  min-width: 28px;
+}
+.hold-delete .hold-button__icon {
+  margin: 0;
+}
+.squish-switch:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.motion-off .animated-icon,
+.motion-off .animated-icon svg,
+.motion-off .animated-icon svg * {
+  animation: none !important;
+}
+.motion-off .squish-switch__track {
+  transition: none;
+}
