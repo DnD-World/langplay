@@ -2,7 +2,7 @@
 // Same palette and type as the Langplay app.
 
 export const RUNNER_CSS = `
-.lpr{--bg:oklch(0.18 0.035 275);--card:oklch(0.225 0.04 275);--sec:oklch(0.28 0.045 275);--fg:oklch(0.95 0.012 100);--muted:oklch(0.74 0.025 245);--pri:oklch(0.79 0.115 170);--pri-fg:oklch(0.2 0.04 275);--acc:oklch(0.7 0.1 190);--coin:oklch(0.9 0.05 95);--bad:oklch(0.66 0.21 22);--border:oklch(0.34 0.035 275);
+.lpr{color-scheme:dark;--bg:oklch(0.18 0.035 275);--card:oklch(0.225 0.04 275);--sec:oklch(0.28 0.045 275);--fg:oklch(0.95 0.012 100);--muted:oklch(0.74 0.025 245);--pri:oklch(0.79 0.115 170);--pri-fg:oklch(0.2 0.04 275);--acc:oklch(0.7 0.1 190);--coin:oklch(0.9 0.05 95);--bad:oklch(0.66 0.21 22);--border:oklch(0.34 0.035 275);
   position:relative;min-height:100vh;background:var(--bg);color:var(--fg);font:15px/1.55 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden;box-sizing:border-box;padding:32px 16px 24px}
 .lpr *,.lpr *::before,.lpr *::after{box-sizing:border-box}
 .lpr [hidden]{display:none!important}
