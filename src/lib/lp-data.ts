@@ -393,6 +393,7 @@ export const QUESTS = [
   { id: "loop", title: "Watch a critic send a draft back", pts: 50, coins: 5 },
   { id: "docs", title: "Search your own document", pts: 50, coins: 5 },
   { id: "install", title: "Install a library recipe", pts: 40, coins: 4 },
+  { id: "share", title: "Share a recipe link", pts: 30, coins: 3 },
   { id: "connect", title: "Test an AI connection", pts: 30, coins: 3 },
   { id: "konami", title: "??? Secret ???", pts: 100, coins: 20 },
 ];

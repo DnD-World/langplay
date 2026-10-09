@@ -13,10 +13,14 @@ import { BuilderPanel } from "@/components/lp/play/BuilderPanel";
 import { RunPanel } from "@/components/lp/play/RunPanel";
 import { LearnPanel } from "@/components/lp/play/LearnPanel";
 import { DocumentsDrawer } from "@/components/lp/play/DocumentsDrawer";
+import { RecipeMenu } from "@/components/lp/play/RecipeMenu";
+import { decodeRecipe, recipeCodeFromHash } from "@/engine";
+import { saveRecipe } from "@/lib/lp-saved";
 import { docSearch, loadDocs, type StoredDoc } from "@/lib/lp-docs";
 import {
   DEFAULT_SETTINGS,
   STORAGE,
+  loadRecipe,
   loadSettings,
   useGame,
   useRecipe,
@@ -70,14 +74,13 @@ function Playground() {
   const [docs, setDocs] = useState<StoredDoc[]>([]);
   const searchDocs = useMemo(() => docSearch(docs), [docs]);
   const [motion, setMotion] = useState(true);
-  const [toast, setToast] = useState<string | null>(null);
-  const toastTimer = useRef<number | undefined>(undefined);
-  const loaded = useRef(false);
+  const [toasts, setToasts] = useState<{ id: number; text: string }[]>([]);
+  const [ready, setReady] = useState(false);
 
   const showToast = useCallback((text: string) => {
-    setToast(text);
-    window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 3000);
+    const id = Date.now() + Math.random();
+    setToasts((t) => [...t.slice(-2), { id, text }]);
+    window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3500);
   }, []);
   const { game, complete, toggleRetro } = useGame(showToast);
 
@@ -89,20 +92,51 @@ function Playground() {
     } catch {
       /* storage may be blocked */
     }
-    loaded.current = true;
+    setReady(true);
   }, []);
   useEffect(() => {
-    if (loaded.current) writeJson(STORAGE.settings, settings);
-  }, [settings]);
+    if (ready) writeJson(STORAGE.settings, settings);
+  }, [settings, ready]);
   useEffect(() => {
     try {
-      if (loaded.current) localStorage.setItem(STORAGE.motion, motion ? "on" : "off");
+      if (ready) localStorage.setItem(STORAGE.motion, motion ? "on" : "off");
     } catch {
       /* storage may be blocked */
     }
     document.documentElement.classList.toggle("motion-off", !motion);
     return () => document.documentElement.classList.remove("motion-off");
-  }, [motion]);
+  }, [motion, ready]);
+
+  // Open a recipe shared by link (#r=…), keeping the current one safe in My recipes.
+  const linkHandled = useRef(false);
+  useEffect(() => {
+    const code = recipeCodeFromHash(location.hash);
+    if (!code || linkHandled.current) return;
+    linkHandled.current = true;
+    history.replaceState(null, "", location.pathname + location.search);
+    decodeRecipe(code)
+      .then((shared) => {
+        const current = loadRecipe(); // what was on screen before the link (saved by autosave)
+        const untouched =
+          JSON.stringify(current.nodes.map((n) => n.instruction)) ===
+          JSON.stringify(defaultRecipe().nodes.map((n) => n.instruction));
+        if (!untouched)
+          try {
+            saveRecipe({ ...current, title: `${current.title} (before opening a link)` });
+          } catch {
+            /* storage full: the shared recipe still opens */
+          }
+        setRecipe(shared);
+        showToast(
+          untouched
+            ? `Opened "${shared.title}".`
+            : `Opened "${shared.title}". Your previous recipe is in My recipes.`,
+        );
+      })
+      .catch((e: unknown) =>
+        showToast(e instanceof Error ? e.message : "Could not open that link"),
+      );
+  }, [setRecipe, showToast]);
 
   useEffect(() => {
     let i = 0;
@@ -169,6 +203,17 @@ function Playground() {
             onMilestone={complete}
             onOpenDocs={() => setShowDocs(true)}
             docCount={docs.length}
+            menu={
+              <RecipeMenu
+                recipe={recipe}
+                setRecipe={(r) => {
+                  setRecipe(r);
+                  setActiveId(null);
+                }}
+                notify={showToast}
+                onShared={() => complete("share")}
+              />
+            }
           />
           <RunPanel
             recipe={recipe}
@@ -195,14 +240,17 @@ function Playground() {
           />
         </main>
 
-        {toast && (
-          <div
-            role="status"
-            className="animate-pop fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg border border-primary bg-card px-5 py-3 text-sm font-bold shadow-2xl"
-          >
-            <AnimatedIcon name="trophy" /> {toast}
-          </div>
-        )}
+        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2">
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              role="status"
+              className="animate-pop rounded-lg border border-primary bg-card px-5 py-3 text-sm font-bold shadow-2xl"
+            >
+              <AnimatedIcon name="trophy" /> {t.text}
+            </div>
+          ))}
+        </div>
 
         <SettingsDrawer
           open={showSettings}

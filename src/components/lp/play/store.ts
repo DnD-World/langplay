@@ -82,14 +82,15 @@ export function loadRecipe(): Recipe {
 /** Recipe editing helpers that keep step references valid. */
 export function useRecipe(initial: () => Recipe) {
   const [recipe, setRecipe] = useState<Recipe>(initial);
-  const loaded = useRef(false);
+  // Saving starts only after the stored recipe is on screen, so loading never overwrites it.
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     setRecipe(loadRecipe());
-    loaded.current = true;
+    setReady(true);
   }, []);
   useEffect(() => {
-    if (loaded.current) writeJson(STORAGE.recipe, recipe);
-  }, [recipe]);
+    if (ready) writeJson(STORAGE.recipe, recipe);
+  }, [recipe, ready]);
 
   const updateNode = useCallback(
     (id: string, patch: NodePatch) =>
@@ -160,7 +161,7 @@ export interface GameState {
 export function useGame(onReward: (text: string) => void) {
   const [game, setGame] = useState<GameState>({ done: [], points: 0, coins: 0, retro: false });
   const completed = useRef(new Set<string>());
-  const loaded = useRef(false);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
     const g = readJson<Partial<GameState>>(STORAGE.game);
     if (g && Array.isArray(g.done) && Number.isFinite(g.points) && Number.isFinite(g.coins)) {
@@ -175,11 +176,11 @@ export function useGame(onReward: (text: string) => void) {
         retro: !!g.retro,
       });
     }
-    loaded.current = true;
+    setReady(true);
   }, []);
   useEffect(() => {
-    if (loaded.current) writeJson(STORAGE.game, game);
-  }, [game]);
+    if (ready) writeJson(STORAGE.game, game);
+  }, [game, ready]);
 
   const complete = useCallback(
     (id: string) => {

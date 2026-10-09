@@ -32,6 +32,7 @@ type Props = {
   graphView?: ReactNode;
   onOpenDocs: () => void;
   docCount: number;
+  menu?: ReactNode;
 };
 
 const selectCls = `${inputCls} py-1.5 text-xs`;
@@ -331,6 +332,7 @@ export function BuilderPanel(props: Props) {
         maxLength={200}
         onChange={(e) => props.onTitle(e.target.value)}
       />
+      {props.menu}
       {recipe.source && (
         <a
           href={recipe.source}
