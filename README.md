@@ -28,7 +28,7 @@ bun install
 bun run dev:local      # http://localhost:20136
 ```
 
-Live: https://langplay.lovable.app · In-app docs: `/docs` · Full setup: [INSTALL.md](INSTALL.md) · Full manual: [GUIDE.md](GUIDE.md)
+Live: https://langplay.stravelakis.com · In-app docs: `/docs` · Full setup: [INSTALL.md](INSTALL.md) · Full manual: [GUIDE.md](GUIDE.md)
 
 ## Screenshots
 

@@ -2,8 +2,9 @@
 
 ## Where it runs
 
-1. **Lovable (primary):** https://langplay.lovable.app. Commits merged into `main` sync into the Lovable project; the site updates when **Publish** is clicked in Lovable.
-2. **Cloudflare Workers (copy, optional):** the build already produces a Worker (`.output/server/wrangler.json`, TanStack Start + Nitro). Not live yet — see below.
+1. **Web:** https://langplay.stravelakis.com — Cloudflare Workers (custom domain on the stravelakis.com zone). Deploy with `bun run deploy:web` after `npx wrangler login`.
+2. **Lovable:** https://langplay.lovable.app — commits merged into `main` sync into the Lovable project; it updates when **Publish** is clicked in Lovable.
+3. **Windows app:** coming (Tauri, built by GitHub Actions, published as GitHub Releases).
 
 ## Environment variables
 
@@ -15,12 +16,7 @@ Follow the release gate in STANDARDS.md §2 (README/HANDOFF current, full audit,
 
 1. Merge the PR into `main` (CI must be green).
 2. Lovable → Publish.
-3. Optional Cloudflare copy:
-   ```bash
-   bun run build
-   npx wrangler deploy --config .output/server/wrangler.json
-   ```
-   Needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` in the environment, plus either a registered `workers.dev` subdomain or a custom-domain route (e.g. `routes = [{ pattern = "langplay.dnd-world.com", custom_domain = true }]`) — both are one-time account/DNS changes the owner must approve.
+3. Web: `bun run deploy:web` (needs a `npx wrangler login` session).
 4. Tag `vX.Y.Z` and publish the GitHub Release.
 
 ## Rollback
