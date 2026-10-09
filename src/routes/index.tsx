@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { KINDS, QUESTS, RANKS, RECIPES, defaultSteps, mk, type Recipe, type Step, type StepKind } from "@/lib/lp-data";
+import { KINDS, PROVIDERS, QUESTS, RANKS, RECIPES, defaultSteps, mk, type Recipe, type Step, type StepKind } from "@/lib/lp-data";
 import { chat, type LlmSettings } from "@/lib/lp-llm";
 import { Info, Label, inputCls, btn } from "@/components/lp/Info";
 import { SettingsDrawer } from "@/components/lp/SettingsDrawer";
