@@ -11,6 +11,7 @@ import {
 import { QUESTS } from "@/lib/lp-data";
 import { defaultRecipe } from "@/lib/lp-recipes";
 import { LESSONS } from "@/lib/lp-lessons";
+import { confetti } from "./confetti";
 
 // Browser-only persistence. Every read is defensive: storage can be blocked, full or edited by hand.
 
@@ -228,6 +229,7 @@ export function useGame(onReward: (text: string) => void) {
         coins: g.coins + Math.round(lesson.xp / 10),
       }));
       onReward(`Lesson complete: ${lesson.title} · +${lesson.xp} XP`);
+      confetti();
     },
     [onReward],
   );

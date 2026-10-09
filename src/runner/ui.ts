@@ -1,5 +1,5 @@
 import { chunkPages, searchChunks, textToPages, type DocChunk } from "../engine/docs";
-import { chainChats, createChat, fallbackFor, OVH_FREE } from "../engine/llm";
+import { createChat, fallbackFor, OVH_FREE } from "../engine/llm";
 import { runRecipe } from "../engine/run";
 import { simulatorChat } from "../engine/simulator";
 import type { LlmSettings, Recipe, RunResult } from "../engine/types";
@@ -267,12 +267,7 @@ export function mountRunner(root: HTMLElement, options: RunnerOptions) {
         q,
         {
           chat,
-          fallbackChat:
-            prefs.choice === "own"
-              ? simulatorChat
-              : prefs.choice === "free"
-                ? fallbackFor(POLLINATIONS)
-                : chainChats(simulatorChat),
+          fallbackChat: prefs.choice === "free" ? fallbackFor(POLLINATIONS) : simulatorChat,
           simulated: settings.provider === "simulator",
           searchDocs: docs.length ? (query, k) => searchChunks(docs, query, k) : undefined,
           signal: controller.signal,

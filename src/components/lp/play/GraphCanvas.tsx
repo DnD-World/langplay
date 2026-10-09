@@ -88,6 +88,7 @@ export default function GraphCanvas({
   onSelect,
   updateNode,
   height,
+  onConnected,
 }: {
   recipe: Recipe;
   activeId: string | null;
@@ -95,6 +96,7 @@ export default function GraphCanvas({
   onSelect: (id: string) => void;
   updateNode: (id: string, patch: NodePatch) => void;
   height: number | string;
+  onConnected?: () => void;
 }) {
   const positions = useMemo(() => layoutRecipe(recipe), [recipe]);
   const build = (): LpNode[] =>
@@ -135,6 +137,7 @@ export default function GraphCanvas({
       });
     } else if (handle === "retry") updateNode(node.id, { retryTo: c.target });
     else updateNode(node.id, { next: c.target });
+    onConnected?.();
   };
 
   const removeEdges = (removed: Edge[]) => {

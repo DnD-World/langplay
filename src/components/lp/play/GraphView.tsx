@@ -15,6 +15,7 @@ export function GraphView({
   updateNode,
   setRecipe,
   editor,
+  onConnected,
 }: {
   recipe: Recipe;
   activeId: string | null;
@@ -24,6 +25,7 @@ export function GraphView({
   setRecipe: (fn: (r: Recipe) => Recipe) => void;
   /** Step editor for the selected node, shown beside the big canvas. */
   editor: ReactNode;
+  onConnected?: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
   const [big, setBig] = useState(false);
@@ -45,6 +47,7 @@ export function GraphView({
           onSelect={onSelect}
           updateNode={updateNode}
           height={height}
+          {...(onConnected ? { onConnected } : {})}
         />
       </Suspense>
     ) : null;

@@ -105,7 +105,8 @@ describe("lessons are earned by doing", () => {
       ...r,
       nodes: r.nodes.map((n, i) => (i === 0 ? { ...n, next: r.nodes[2]!.id } : n)),
     };
-    expect(lesson("l-graph").check(ctx(jumped))).toBe(true);
+    expect(lesson("l-graph").check(ctx(jumped))).toBe(false); // a library recipe's jumps don't count
+    expect(lesson("l-graph").check(ctx(jumped, undefined, ["edge"]))).toBe(true);
     expect(lesson("l-compare").check(ctx(r, undefined, ["compared"]))).toBe(true);
     expect(lesson("l-python").check(ctx(r, undefined, ["python"]))).toBe(true);
     expect(lesson("l-spinout").check(ctx(r, undefined, ["spinout"]))).toBe(true);

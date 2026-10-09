@@ -4,7 +4,7 @@ import { RECIPES, cloneRecipe } from "./lp-recipes";
 // The lesson path: small challenges that each teach one LangChain / LangGraph idea.
 // Every check looks only at the recipe and the latest run, so progress is earned by doing.
 
-export type LessonEvent = "compared" | "python" | "spinout" | "shared";
+export type LessonEvent = "compared" | "python" | "spinout" | "shared" | "edge";
 
 export interface LessonContext {
   recipe: Recipe;
@@ -137,8 +137,8 @@ export const LESSONS: Lesson[] = [
     concept: "Edges decide what runs next. add_edge(a, b) in LangGraph is exactly this arrow.",
     hint: "Open Builder → Graph, drag from the dot under one step to another step further down.",
     xp: 60,
-    check: (ctx) =>
-      !isLinear(ctx.recipe) && ctx.recipe.nodes.some((n) => n.next && n.next !== "end"),
+    // Only an edge the learner drew counts — library recipes already contain jumps.
+    check: (ctx) => ctx.events.has("edge") && !isLinear(ctx.recipe),
   },
   {
     id: "l-compare",

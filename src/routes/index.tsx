@@ -227,6 +227,7 @@ function Playground() {
             moveNode={moveNode}
             onTitle={(title) => setRecipe((r) => ({ ...r, title }))}
             setRecipe={setRecipe}
+            onEdgeDrawn={() => addEvent("edge")}
             onMilestone={complete}
             onOpenDocs={() => setShowDocs(true)}
             docCount={docs.length}

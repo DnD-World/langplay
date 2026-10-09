@@ -222,11 +222,11 @@ export function RunPanel({
 
   return (
     <section
-      className="flex min-h-[600px] flex-col rounded-lg border bg-card/90"
+      className="flex min-h-[600px] flex-col rounded-lg border bg-card/90 max-lg:order-first"
       aria-label="Live run"
     >
       <div className="flex items-center justify-between gap-2 border-b p-4">
-        <h2 className="flex items-center font-bold">
+        <h2 className="flex items-center whitespace-nowrap font-bold">
           <AnimatedIcon name="chat" /> Live Run
           <Info tip="Type a question and watch your recipe work on it step by step." />
         </h2>

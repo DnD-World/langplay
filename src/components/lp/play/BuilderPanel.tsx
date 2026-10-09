@@ -34,6 +34,7 @@ type Props = {
   onOpenDocs: () => void;
   docCount: number;
   menu?: ReactNode;
+  onEdgeDrawn?: () => void;
 };
 
 const selectCls = `${inputCls} py-1.5 text-xs`;
@@ -380,6 +381,7 @@ export function BuilderPanel(props: Props) {
             updateNode={updateNode}
             setRecipe={props.setRecipe}
             editor={activeNode ? editorFor(activeNode) : null}
+            {...(props.onEdgeDrawn ? { onConnected: props.onEdgeDrawn } : {})}
           />
           {activeNode && (
             <div className="mt-3 rounded-lg border p-3">
