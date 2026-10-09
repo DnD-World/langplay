@@ -15,6 +15,21 @@ async function invoke<T>(command: string, args?: Record<string, unknown>): Promi
 const isExternal = (url: string) => /^https?:\/\//i.test(url) && !url.startsWith(location.origin);
 
 /**
+ * Requests that should go through the app instead of the web view: other sites, and local AI
+ * servers. Never Tauri's own internal addresses (*.localhost), which carry the app's messages —
+ * routing those through the app would loop forever.
+ */
+export function routeThroughApp(url: string): boolean {
+  if (!isExternal(url)) return false;
+  try {
+    const host = new URL(url).hostname;
+    return host !== "localhost" && !host.endsWith(".localhost");
+  } catch {
+    return false;
+  }
+}
+
+/**
  * In the app, AI and tool requests go through the app itself instead of the web view, so services
  * that block browser requests (or "localhost" pages) still answer. Same API as fetch.
  */
@@ -24,7 +39,7 @@ export async function installDesktopFetch() {
   const original = window.fetch.bind(window);
   window.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    return isExternal(url) ? appFetch(input, init) : original(input, init);
+    return routeThroughApp(url) ? appFetch(input, init) : original(input, init);
   }) as typeof window.fetch;
 }
 

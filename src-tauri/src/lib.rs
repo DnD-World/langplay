@@ -75,11 +75,19 @@ fn open_window(app: &AppHandle) -> tauri::Result<()> {
         let _ = window.set_focus();
         return Ok(());
     }
-    WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+    let mut builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
         .title("Langplay")
         .inner_size(1360.0, 860.0)
-        .min_inner_size(900.0, 600.0)
-        .build()?;
+        .min_inner_size(900.0, 600.0);
+    // Testing aid: LANGPLAY_WEBVIEW_DEBUG_PORT=nnnnn exposes the window to automated browser tests.
+    if let Ok(port) = std::env::var("LANGPLAY_WEBVIEW_DEBUG_PORT") {
+        if let Ok(port) = port.parse::<u16>() {
+            builder = builder.additional_browser_args(&format!(
+                "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --remote-debugging-port={port}"
+            ));
+        }
+    }
+    builder.build()?;
     Ok(())
 }
 
