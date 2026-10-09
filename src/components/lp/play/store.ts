@@ -10,6 +10,7 @@ import {
 } from "@/engine";
 import { QUESTS } from "@/lib/lp-data";
 import { defaultRecipe } from "@/lib/lp-recipes";
+import { LESSONS } from "@/lib/lp-lessons";
 
 // Browser-only persistence. Every read is defensive: storage can be blocked, full or edited by hand.
 
@@ -152,6 +153,7 @@ export function useRecipe(initial: () => Recipe) {
 
 export interface GameState {
   done: string[];
+  lessons: string[];
   points: number;
   coins: number;
   retro: boolean;
@@ -159,7 +161,13 @@ export interface GameState {
 
 /** XP, coins and milestones. Rewards are deduplicated with an immediate set so a double click never pays twice. */
 export function useGame(onReward: (text: string) => void) {
-  const [game, setGame] = useState<GameState>({ done: [], points: 0, coins: 0, retro: false });
+  const [game, setGame] = useState<GameState>({
+    done: [],
+    lessons: [],
+    points: 0,
+    coins: 0,
+    retro: false,
+  });
   const completed = useRef(new Set<string>());
   const [ready, setReady] = useState(false);
   useEffect(() => {
@@ -171,6 +179,11 @@ export function useGame(onReward: (text: string) => void) {
       completed.current = new Set(valid);
       setGame({
         done: valid,
+        lessons: Array.isArray(g.lessons)
+          ? g.lessons.filter(
+              (id): id is string => typeof id === "string" && LESSONS.some((l) => l.id === id),
+            )
+          : [],
         points: Math.max(0, g.points as number),
         coins: Math.max(0, g.coins as number),
         retro: !!g.retro,
@@ -199,6 +212,25 @@ export function useGame(onReward: (text: string) => void) {
     },
     [onReward],
   );
+  const lessonsDone = useRef(new Set<string>());
+  useEffect(() => {
+    lessonsDone.current = new Set(game.lessons);
+  }, [game.lessons]);
+  const completeLesson = useCallback(
+    (id: string) => {
+      const lesson = LESSONS.find((l) => l.id === id);
+      if (!lesson || lessonsDone.current.has(id)) return;
+      lessonsDone.current.add(id);
+      setGame((g) => ({
+        ...g,
+        lessons: [...new Set([...g.lessons, id])],
+        points: g.points + lesson.xp,
+        coins: g.coins + Math.round(lesson.xp / 10),
+      }));
+      onReward(`Lesson complete: ${lesson.title} · +${lesson.xp} XP`);
+    },
+    [onReward],
+  );
   const toggleRetro = useCallback(() => setGame((g) => ({ ...g, retro: !g.retro })), []);
-  return { game, complete, toggleRetro };
+  return { game, complete, completeLesson, toggleRetro };
 }

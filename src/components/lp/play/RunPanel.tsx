@@ -84,6 +84,7 @@ export function RunPanel({
   firstRunDone,
   docCount,
   onOpenDocs,
+  onResult,
 }: {
   recipe: Recipe;
   settings: LlmSettings;
@@ -93,6 +94,7 @@ export function RunPanel({
   firstRunDone: boolean;
   docCount: number;
   onOpenDocs: () => void;
+  onResult?: (result: RunResult) => void;
 }) {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -174,6 +176,7 @@ export function RunPanel({
         b ? execute(b, q, signal, patch("b"), false) : Promise.resolve(null),
       ]);
       if (ra) {
+        onResult?.(ra);
         onMilestone("first_run");
         if (b) onMilestone("compare");
         if (ra.steps.some((s) => s.kind === "tool" && !s.practice)) onMilestone("tool");

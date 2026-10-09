@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { LlmSettings, Recipe } from "@/engine";
+import type { LlmSettings, Recipe, RunResult } from "@/engine";
+import type { LessonEvent } from "@/lib/lp-lessons";
+import { LessonsCard } from "@/components/lp/play/LessonsCard";
 import { MILESTONE_COUNT, QUESTS } from "@/lib/lp-data";
 import { cloneRecipe, defaultRecipe } from "@/lib/lp-recipes";
 import { SettingsDrawer } from "@/components/lp/SettingsDrawer";
@@ -82,7 +84,17 @@ function Playground() {
     setToasts((t) => [...t.slice(-2), { id, text }]);
     window.setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3500);
   }, []);
-  const { game, complete, toggleRetro } = useGame(showToast);
+  const { game, complete, completeLesson, toggleRetro } = useGame(showToast);
+  const [lastRun, setLastRun] = useState<RunResult | undefined>(undefined);
+  const [events, setEvents] = useState<Set<LessonEvent>>(new Set());
+  const addEvent = useCallback(
+    (e: LessonEvent) => setEvents((old) => (old.has(e) ? old : new Set([...old, e]))),
+    [],
+  );
+  const lessonContext = useMemo(
+    () => ({ recipe, run: lastRun, events }),
+    [recipe, lastRun, events],
+  );
 
   useEffect(() => {
     void loadDocs().then(setDocs);
@@ -212,7 +224,10 @@ function Playground() {
                   setActiveId(null);
                 }}
                 notify={showToast}
-                onShared={() => complete("share")}
+                onShared={() => {
+                  complete("share");
+                  addEvent("shared");
+                }}
               />
             }
           />
@@ -226,7 +241,11 @@ function Playground() {
               setRunningId(id);
               if (id) setActiveId(id);
             }}
-            onMilestone={complete}
+            onMilestone={(id) => {
+              complete(id);
+              if (id === "compare") addEvent("compared");
+            }}
+            onResult={setLastRun}
             firstRunDone={game.done.includes("first_run")}
           />
           <LearnPanel
@@ -238,6 +257,17 @@ function Playground() {
             }}
             points={game.points}
             done={game.done}
+            lessons={
+              <LessonsCard
+                context={lessonContext}
+                done={game.lessons}
+                onComplete={completeLesson}
+                onLoadStarter={(r) => {
+                  setRecipe(r);
+                  setActiveId(r.nodes[0]?.id ?? null);
+                }}
+              />
+            }
           />
         </main>
 
