@@ -7,6 +7,8 @@ import { AnimatedIcon } from "./AnimatedIcon";
 import { fetchModels, presetModels, MODEL_POLICY, type ModelOption } from "@/lib/lp-models";
 import { Overlay } from "./Overlay";
 import { SquishToggle } from "./EffectControls";
+import { DesktopPanel } from "./DesktopPanel";
+import { isDesktop } from "@/desktop/bridge";
 import { Connections } from "./Connections";
 
 const FREE_KEY_GUIDES: Record<
@@ -143,6 +145,7 @@ export function SettingsDrawer({
         <span className="text-sm">Motion</span>
         <Info tip="Turn letter animations, glowing borders, animated icons and click sparks on or off." />
       </div>
+      <DesktopPanel settings={settings} setSettings={setSettings} />
       <Connections settings={settings} setSettings={setSettings} />
       <p className="mb-5 text-sm text-muted-foreground">
         Choose which AI brain powers your recipes.
@@ -154,22 +157,24 @@ export function SettingsDrawer({
           <div key={g}>
             <div className="mb-1 text-[11px] text-muted-foreground">{g}</div>
             <div className="grid grid-cols-2 gap-1.5">
-              {PROVIDERS.filter((p) => p.group === g).map((p) => (
-                <Button
-                  variant="ghost"
-                  key={p.id}
-                  onClick={() => pick(p.id)}
-                  aria-label={p.name}
-                  className={`flex h-auto min-h-9 items-center justify-between whitespace-normal rounded-lg border px-2.5 py-2 text-left text-xs transition ${
-                    settings.provider === p.id
-                      ? "border-primary bg-primary/15 text-primary"
-                      : "hover:border-primary/50"
-                  }`}
-                >
-                  <span>{p.name}</span>
-                  <Info tip={p.tip} />
-                </Button>
-              ))}
+              {PROVIDERS.filter((p) => p.group === g && (p.id !== "offline" || isDesktop())).map(
+                (p) => (
+                  <Button
+                    variant="ghost"
+                    key={p.id}
+                    onClick={() => pick(p.id)}
+                    aria-label={p.name}
+                    className={`flex h-auto min-h-9 items-center justify-between whitespace-normal rounded-lg border px-2.5 py-2 text-left text-xs transition ${
+                      settings.provider === p.id
+                        ? "border-primary bg-primary/15 text-primary"
+                        : "hover:border-primary/50"
+                    }`}
+                  >
+                    <span>{p.name}</span>
+                    <Info tip={p.tip} />
+                  </Button>
+                ),
+              )}
             </div>
           </div>
         ))}

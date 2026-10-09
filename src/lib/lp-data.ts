@@ -143,6 +143,7 @@ export type ProviderId =
   | "kilo"
   | "custom"
   | "gemini"
+  | "offline"
   | "cerebras"
   | "nvidia"
   | "mistral"
@@ -216,6 +217,16 @@ export const PROVIDERS: {
     ],
     needsKey: false,
     tip: "A European cloud with a free, rate-limited AI tier. Your questions are sent to OVHcloud.",
+  },
+  {
+    id: "offline",
+    name: "Offline AI (built in)",
+    group: "On your computer",
+    baseUrl: "http://127.0.0.1:12081/v1",
+    model: "local",
+    models: ["local"],
+    needsKey: false,
+    tip: "Windows app only: a model you downloaded under Settings → Offline AI. No key, no internet.",
   },
   {
     id: "ollama",

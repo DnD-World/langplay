@@ -4,7 +4,15 @@ import type { ChatFn, ChatResult, LlmSettings, Msg } from "./types";
 // Talks to AI services. Any OpenAI-compatible endpoint works; Puter is browser-only;
 // the Simulator works everywhere with no network.
 
-export const KEYLESS_FREE = ["simulator", "ollama", "lmstudio", "horde", "pollinations", "ovh"];
+export const KEYLESS_FREE = [
+  "simulator",
+  "offline",
+  "ollama",
+  "lmstudio",
+  "horde",
+  "pollinations",
+  "ovh",
+];
 const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
 
 export function endpointFor(baseUrl: string, path: "/chat/completions" | "/models"): URL {

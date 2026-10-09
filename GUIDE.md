@@ -69,6 +69,14 @@ The complete manual. Everything here also exists inside the app at `/docs` (simp
 
 Spun-out tools never contain your API key. Set `LANGPLAY_BASE_URL`, `LANGPLAY_MODEL`, `LANGPLAY_API_KEY` where they run to use your own service.
 
+### Windows app
+
+- **Install:** run `Langplay_x.y.z_x64-setup.exe` (no admin rights). "Unknown publisher" warning → More info → Run anyway.
+- **Window or browser:** Settings → Open Langplay in. Browser mode serves the app on `127.0.0.1:20136` (this computer only) and puts a tray icon with Open / Switch to window / Quit.
+- **Offline AI:** Settings → Offline AI → Get this model (0.5, 1.1 or 2.0 GB, plus an 18 MB engine the first time). Downloads are checked against known checksums. "Use offline" starts it with half your processor cores and switches Langplay to it; Stop frees the computer again.
+- **Update / Repair:** Settings → Advanced. Your recipes, settings, progress and models are kept.
+- **Uninstall:** Windows Settings → Apps → Installed apps → Langplay.
+
 ## Configuration
 
 | Setting                | Default               | What it does                                                                           |

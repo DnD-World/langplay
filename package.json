@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "dev:local": "vite dev --port 20136 --strictPort",
-    "deploy:web": "vite build && node scripts/deploy-cloudflare.mjs"
+    "deploy:web": "vite build && node scripts/deploy-cloudflare.mjs",
+    "build:desktop": "node scripts/build-desktop.mjs",
+    "tauri": "tauri"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -52,6 +54,11 @@
     "@tanstack/react-router": "1.170.41",
     "@tanstack/react-start": "1.168.60",
     "@tanstack/router-plugin": "1.168.42",
+    "@tauri-apps/api": "2.11.0",
+    "@tauri-apps/plugin-http": "2.6.1",
+    "@tauri-apps/plugin-opener": "2.5.5",
+    "@tauri-apps/plugin-process": "2.3.1",
+    "@tauri-apps/plugin-updater": "2.12.0",
     "@xyflow/react": "^12.12.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -81,6 +88,7 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "2.25.3",
+    "@tauri-apps/cli": "2.11.5",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
     "@types/node": "^22.16.5",

@@ -81,7 +81,7 @@ export function classifyModel(
 ): ModelOption {
   if (["pollinations", "ovh"].includes(provider))
     return { id, free: true, evidence: "Free tier · very limited" };
-  if (["simulator", "ollama", "lmstudio", "horde"].includes(provider))
+  if (["simulator", "offline", "ollama", "lmstudio", "horde"].includes(provider))
     return {
       id,
       free: true,
@@ -128,7 +128,7 @@ export function presetModels(s: LlmSettings): ModelOption[] {
   );
 }
 export async function fetchModels(s: LlmSettings): Promise<ModelOption[]> {
-  if (["simulator", "puter"].includes(s.provider)) return presetModels(s);
+  if (["simulator", "puter", "offline"].includes(s.provider)) return presetModels(s);
   const headers: Record<string, string> = {};
   if (s.apiKey && s.provider !== "openrouter") headers["Authorization"] = `Bearer ${s.apiKey}`;
   const endpoint = new URL(`${s.baseUrl.replace(/\/$/, "")}/models`);

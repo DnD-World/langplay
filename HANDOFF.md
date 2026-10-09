@@ -8,7 +8,7 @@ Langplay is a browser-only playground for learning LangChain/LangGraph without c
 
 ## Current state
 
-- **Works:** shared engine (`src/engine`), real tools, documents, graph canvas, save/share/export, compare, lessons, all 7 spin-outs, phone layout, docs page.
+- **Works:** shared engine, real tools, documents, graph canvas, save/share/export, compare, lessons, 7 spin-outs, saved AI connections, docs site, and the **Windows app** (installer, window/browser mode, offline AI, Update, Repair) — all tested on this laptop from the GitHub-built installer.
 - **Live:** https://langplay.stravelakis.com (Cloudflare, deployed 2026-10-09) and langplay.lovable.app (after Publish in Lovable).
 - **Direction (owner, 2026-10-09):** free forever, no money; personal + downloadable Windows app to the signature standards (installer, Repair/Update, app-or-browser mode, triple docs); optional offline AI download; the website stays a live web version. Never anything the owner pays for.
 - **Known issues:** free keyless AI is thin (Pollinations asks for payment after a few requests per visitor; OVHcloud allows ~2/min); local dev on `localhost` is blocked by Pollinations' bot check (OVH works).
@@ -16,10 +16,10 @@ Langplay is a browser-only playground for learning LangChain/LangGraph without c
 
 ## Next steps, in order
 
-1. Windows app with Tauri v2, built and released by GitHub Actions (installer + uninstaller, Settings → Advanced Repair/Update from GitHub Releases, window or browser mode on port 20136).
-2. Optional offline AI: llama.cpp server + a small model, downloaded on request, shown as a provider.
-3. Save several custom OpenAI-compatible endpoints.
-4. Triple-level docs site (Dev / English / ELI5) from the docs theme; tag v1.0.0.
+1. Keep releasing with tags (DEPLOY.md). Bump versions in `src-tauri/tauri.conf.json` + `Cargo.toml` first.
+2. Optional: GPU (Vulkan) build of the offline engine for faster local answers.
+3. Optional: code signing — removes the "unknown publisher" warning but costs money every year (owner is frugal: not planned).
+4. v1.0.0 = move to the Stravelakis org and docs.stravelakis.com/langplay.
 
 ## Run it
 
@@ -55,6 +55,11 @@ bun run test
 
 ## Gotchas
 
+- Tauri's internal messages on Windows are web requests to `*.localhost`; the desktop fetch hook must never route those (it hung every call once). Covered by `src/test/desktop.test.ts`.
+- Test the installed app with `LANGPLAY_WEBVIEW_DEBUG_PORT=20143`; the port listens on IPv6 `[::1]`, then Playwright `connectOverCDP("http://[::1]:20143")`.
+- Port 20136 is both the local dev server and the app's browser mode — stop one before testing the other.
+- GitHub Pages only deploys from `main` and `v*` tags (environment rule set 2026-10-09).
+
 - Pollinations returns 403 "Missing Turnstile token" from `localhost` only; test real AI locally with OVH.
 - OVH free tier: 2 requests/minute per model per IP; multi-step recipes fall back after that.
 - Lovable asset URLs (`/__l5e/...`) only work on lovable.app — use files in `public/` instead.
@@ -66,9 +71,10 @@ bun run test
 
 Names only. Langplay itself needs none (see `.env.example`).
 
-| Name                                            | What for                 | Where                                          |
-| ----------------------------------------------- | ------------------------ | ---------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` | Optional Cloudflare copy | Owner's private key store (never in this repo) |
+| Name                                              | What for            | Where                                                                                                          |
+| ------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Cloudflare deploy                                 | Web version         | `npx wrangler login` session on the owner's machine (the API token in the key store lacks Workers edit rights) |
+| `TAURI_SIGNING_PRIVATE_KEY` (+ empty `_PASSWORD`) | Signing app updates | GitHub Actions secret; copy in the owner's private key store                                                   |
 
 ## Open questions
 
