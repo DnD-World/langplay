@@ -24,7 +24,7 @@ export function TopBar({
 }) {
   const { rank } = rankFor(points);
   return (
-    <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b bg-background/85 px-4 py-3 backdrop-blur">
+    <header className="sticky top-0 z-30 flex flex-wrap items-center gap-3 border-b bg-background/85 px-4 py-3 backdrop-blur max-sm:gap-2 max-sm:px-3 max-sm:py-2">
       <div className="flex items-center gap-2">
         <img
           className="brand-logo"
@@ -37,15 +37,15 @@ export function TopBar({
           <h1 className="text-lg font-extrabold leading-none tracking-tight">
             Lang<span className="text-primary">play</span>
           </h1>
-          <p className="text-[11px] text-muted-foreground">Your AI adventure</p>
+          <p className="text-[11px] text-muted-foreground max-sm:hidden">Your AI adventure</p>
         </div>
       </div>
-      <div className="ml-auto flex flex-wrap items-center gap-2">
+      <div className="ml-auto flex flex-wrap items-center gap-2 max-sm:gap-1.5">
         <div className="nav-stat">
           <span className="animate-pop" key={rank.name}>
             <AnimatedIcon name="crown" />
           </span>
-          <span className="font-bold">{rank.name}</span>
+          <span className="font-bold max-sm:hidden">{rank.name}</span>
           <Info tip="Your level — earn XP by completing milestones and lessons to rank up." />
         </div>
         <div className="nav-stat font-bold text-primary">
@@ -63,7 +63,7 @@ export function TopBar({
           onClick={onLibrary}
           className={`${btn} relative border bg-card hover:border-primary`}
         >
-          <AnimatedIcon name="tool" /> Explore Library
+          <AnimatedIcon name="tool" /> <span className="max-sm:hidden">Explore </span>Library
           <span className="absolute -right-2 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[10px] text-accent-foreground">
             {RECIPES.length}
           </span>
@@ -75,7 +75,7 @@ export function TopBar({
           className={`${btn} hover:brightness-110`}
         >
           <AnimatedIcon name="settings" /> Settings
-          <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-normal">
+          <span className="rounded-full bg-background/40 px-2 py-0.5 text-[10px] font-normal max-sm:hidden">
             {PROVIDERS.find((p) => p.id === provider)?.name ?? provider}
           </span>
         </Button>

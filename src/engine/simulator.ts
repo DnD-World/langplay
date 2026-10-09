@@ -43,16 +43,27 @@ export function simulateReply(messages: Msg[]): string {
     return tokenize(request).slice(0, 6).join(" ") || request.slice(0, 60);
   }
   if (system.includes(CRITIC_MARK)) {
-    return user.includes("(revised practice answer)")
+    return user.includes("Revised practice answer")
       ? "PASS — the draft now has a concrete example."
       : "REVISE: add one concrete everyday example so a beginner can picture it.";
   }
   const notes = section(user, "Notes from earlier steps");
   const feedback = section(user, "Reviewer feedback to fix");
-  const prefix = feedback ? "(revised practice answer)" : "(practice answer)";
-  const evidence = notes ? ` Using the notes: ${notes.split("\n")[0]?.slice(0, 140)}` : "";
-  const fix = feedback ? ` Fixed: ${feedback.slice(0, 100)}` : "";
-  return `${prefix} Following "${system.split("\n")[0]?.slice(0, 70)}" for "${topic}": break it into small pieces, explain each in plain words, and end with one clear takeaway.${evidence}${fix} Connect a real AI in Settings for a real answer.`;
+  const task = (system.split("\n")[0] ?? "")
+    .replace(/\s*Keep it short and beginner-friendly\.?\s*$/i, "")
+    .trim()
+    .slice(0, 120);
+  const lines = [
+    feedback
+      ? "🧪 Revised practice answer (not a real AI)."
+      : "🧪 Practice answer (not a real AI).",
+    `A real model would now ${task ? `do this: “${task}”` : "answer"} — for “${topic}”.`,
+  ];
+  if (notes)
+    lines.push(`It would use this note: ${notes.split("\n")[0]?.replace(/^- /, "").slice(0, 160)}`);
+  if (feedback) lines.push(`And fix: ${feedback.slice(0, 120)}`);
+  lines.push("Turn on a real AI in Settings (free options available) for a real answer.");
+  return lines.join("\n");
 }
 
 export const simulatorChat: ChatFn = async (messages) => {

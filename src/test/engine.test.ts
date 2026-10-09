@@ -122,7 +122,7 @@ describe("engine: running recipes", () => {
     });
     expect(result.fallbacks).toBe(1);
     expect(result.steps[0]?.note).toContain("429");
-    expect(result.answer).toContain("practice answer");
+    expect(result.answer).toContain("Practice answer");
   });
 
   it("uses the calculator tool with an AI-written expression and records sources", async () => {

@@ -33,7 +33,8 @@ export const RUNNER_CSS = `
 .lpr-step.is-on{border-color:var(--acc);color:var(--fg);box-shadow:0 0 0 3px color-mix(in oklab,var(--acc) 25%,transparent);animation:lpr-pulse 1s ease-in-out infinite}
 .lpr-step.is-done{border-color:color-mix(in oklab,var(--pri) 60%,var(--border));color:var(--pri)}
 @keyframes lpr-pulse{50%{transform:translateY(-1px)}}
-.lpr-answer{margin-top:16px;padding:16px;border-radius:12px;background:var(--sec);white-space:pre-wrap;animation:lpr-in .45s cubic-bezier(.2,.8,.2,1) both}
+.lpr-answer{margin-top:16px;padding:16px;border-radius:12px;background:var(--sec);animation:lpr-in .45s cubic-bezier(.2,.8,.2,1) both}
+.lpr-answer>*{margin:0 0 .6em}.lpr-answer>*:last-child{margin-bottom:0}.lpr-answer ul,.lpr-answer ol{padding-left:1.3em}.lpr-answer ul{list-style:disc}.lpr-answer ol{list-style:decimal}.lpr-answer li{margin:.2em 0}.lpr-answer h3,.lpr-answer h4,.lpr-answer h5{font-size:1rem;margin-top:.8em}.lpr-answer code{font-family:"JetBrains Mono",monospace;font-size:.88em;background:color-mix(in oklab,var(--bg) 60%,transparent);padding:1px 4px;border-radius:4px}
 @keyframes lpr-in{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
 .lpr-meta{margin-top:8px;color:var(--muted);font-size:.78rem}
 .lpr-err{margin-top:12px;color:var(--bad);font-size:.9rem}

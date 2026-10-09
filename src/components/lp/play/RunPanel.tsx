@@ -19,6 +19,7 @@ import { RunThought, SquishToggle } from "../EffectControls";
 import { Info, btn, inputCls } from "../Info";
 import { TraceView } from "./TraceView";
 import { runMeta } from "./helpers";
+import { Answer } from "./Answer";
 
 type Side = {
   recipe: Recipe;
@@ -200,7 +201,7 @@ export function RunPanel({
       )}
       {side.result ? (
         <>
-          <p className="whitespace-pre-wrap">{side.result.answer}</p>
+          <Answer text={side.result.answer} />
           <p className="mt-2 border-t pt-1.5 text-[11px] text-muted-foreground">
             {runMeta(side.result, side.settings)}
             {side.result.fallbacks > 0 &&
@@ -342,7 +343,9 @@ export function RunPanel({
             onChange={(e) => setQuestion(e.target.value)}
             placeholder="Ask a question, e.g. Why is the sky blue?"
           />
-          <Info tip="Your question — it gets dropped into the first step of the recipe." />
+          <span className="max-sm:hidden">
+            <Info tip="Your question — it gets dropped into the first step of the recipe." />
+          </span>
           {running ? (
             <Button
               type="button"

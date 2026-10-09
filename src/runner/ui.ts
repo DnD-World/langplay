@@ -3,6 +3,7 @@ import { createChat, fallbackFor, OVH_FREE } from "../engine/llm";
 import { runRecipe } from "../engine/run";
 import { simulatorChat } from "../engine/simulator";
 import type { LlmSettings, Recipe, RunResult } from "../engine/types";
+import { markdownToDom } from "./markdown";
 import { RUNNER_CSS } from "./styles";
 
 // A spun-out recipe as its own little app: question in, answer out, with the steps visible.
@@ -314,7 +315,7 @@ export function mountRunner(root: HTMLElement, options: RunnerOptions) {
           );
       }
       out.append(
-        el("div", { class: "lpr-answer" }, result.answer),
+        el("div", { class: "lpr-answer" }, markdownToDom(result.answer)),
         el(
           "p",
           { class: "lpr-meta" },

@@ -181,12 +181,12 @@ export default function SpinOutDialog({
 
       {(tab === "page" || tab === "embed" || tab === "html") && (
         <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="w-full text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Who answers visitors
           </span>
           <select
             aria-label="Who answers visitors"
-            className={`${inputCls} w-auto py-1.5 text-xs`}
+            className={`${inputCls} w-auto min-w-0 flex-1 py-1.5 text-xs`}
             value={provider}
             onChange={(e) => setSpinout(e.target.value as SpinoutProvider)}
           >
